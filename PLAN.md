@@ -100,14 +100,32 @@ reader takes to a design review.
       The harness already separates a dead provider (40 requests failed in
       140ms) from a slow one (same 0% correct, 15,180ms), which is ch06's
       argument arriving before ch06 was written.
-- [ ] **M2, ch01 the provider seam**: inline SDK calls at every call site vs a
-      single seam. Stressor: three requirement changes applied to both (swap
-      provider, add timeout and retry, add per-request cost accounting).
-      Measure: files touched, lines changed, and whether total spend per
-      request is even *obtainable* in each shape. The LLM-specific twist: a
-      provider seam is thicker than a normal adapter because streaming, tool
-      calls, and token accounting all differ per provider, so the honest ADR
-      has to price the seam, not just praise it.
+- [x] **M2, ch01 the provider seam** (done 2026-08-06; see
+      ch01-provider-seam/ADR.md). Grew from three requirements to five: a
+      fourth call site and a streaming call site were added because the first
+      three all favoured the seam and a one-sided slate proves nothing.
+      Twelve builds, held to byte-identical output by `fairness.py`.
+      Headline: **95 lines changed against 192**, upfront cost **1 line**, so
+      no break-even point exists to find.
+      - **Prediction refuted.** Streaming was included expecting it to cost
+        the seam more; the seam changed 32 lines against inline's 40. Reported
+        as a refutation rather than quietly dropped (AUTHORING-LESSONS §12).
+        The real cost landed where line counting cannot see it: the interface
+        doubled, the "no uncounted call" guarantee became conditional, and
+        retry stopped applying to the streaming path in *both* builds.
+      - **The best finding was an accident.** Spend agreed exactly through v4
+        ($0.000099 both) then diverged at v5 ($0.000097 vs $0.000100), because
+        a streamed response has no usage block and each build fell back to a
+        different, defensible estimate. Silent, and a dashboard draws a smooth
+        line through it.
+      - **Fake SDKs were necessary, not decorative.** `app/fake_sdks.py`
+        copies the real OpenAI and Anthropic signatures, response shapes,
+        token field names, error types, and streaming interfaces. Swapping two
+        identical fake clients would have made the v1 number fiction.
+      - **Counting rule matters and is stated in the tool**: docstrings,
+        comments, and blanks excluded (each version carries a different header,
+        so counting prose would measure the author); a modified line counts as
+        two. Raw counts printed alongside.
 - [ ] **M3, ch02 where conversation state lives**: in-process dict vs a shared
       store. Stressor: two workers behind one entry point, same session id.
       Measure: percentage of turns whose history silently vanished. Expected
