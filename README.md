@@ -50,6 +50,46 @@ reverse when a number changes, and the ADR names the number. What you get at
 the end is a folder of decision records backed by measurements, which is
 exactly the artifact a senior engineer is asked to produce.
 
+## Run it
+
+The reference app and the measuring instrument exist; the chapters do not yet.
+Everything below is offline, needs no key, and costs nothing.
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env               # config only (PROVIDER); no keys go here
+python check_setup.py
+
+python examples/00_reference_app.py    # the app, one request at a time
+python examples/01_stress_harness.py   # the same workload under five pressures
+python examples/02_repeatability.py    # proves the numbers reproduce
+```
+
+Two results from the harness worth seeing before any chapter exists.
+
+**A dead dependency and a slow one are not the same outage.** Same workload,
+same 0% correct answers, and the wall clock differs by two orders of
+magnitude: the dead provider fails 40 requests in 140ms, the slow one holds
+every worker until each request burns its full 3s deadline, taking 15,180ms.
+Anything that treats those alike is wrong about one of them.
+
+**The day-one app answers questions it has no source for.** Ask it about
+quantum entanglement and it replies fluently from a document about two-factor
+auth. It did not error, so an availability dashboard scores that request as a
+success. That is why the harness separates `wrong_source` from `error`, and
+why "answered at all" is never the headline number in these ADRs.
+
+Determinism here is a specific claim, not a vibe. The same workload run twice,
+concurrently, produces identical answers, sources, failures, and *simulated*
+latency, and `02_repeatability.py` asserts exactly that, including a check that
+running at concurrency 1 changes nothing. Wall-clock latency is not
+reproducible and is never asserted on: per-request drift runs a few
+milliseconds, and the script prints it rather than hiding it. Claims that need
+to reproduce cite simulated time; claims about what a real machine did say so
+and show the spread.
+
 ## The chapters
 
 | # | The decision | The stressor | Status |
