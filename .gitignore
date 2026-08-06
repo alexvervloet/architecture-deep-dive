@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets: never commit your real keys
+.env
+
+# Local run artifacts
+runs/*.jsonl
+*.db
+
+# Editor / local history
+.history/
+.vscode/
