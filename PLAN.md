@@ -75,12 +75,31 @@ reader takes to a design review.
 ## Milestones
 
 - [x] **M0, scaffold**: git init, LICENSE, .gitignore, README, this plan.
-- [ ] **M1, the reference app + mock provider**: the ask-over-a-corpus service,
-      a small fixed corpus, and a mock provider with knobs for latency,
-      failure injection, and token accounting. Also the stress harness: a
-      concurrency runner that reports p50/p95/timeouts, and a fault injector.
-      Everything downstream depends on this being deterministic, so this
-      milestone ends with a repeatability check: same seed, same numbers.
+- [x] **M1, the reference app + mock provider** (done 2026-08-06): the
+      ask-over-a-corpus service, a 12-document corpus, and a mock provider with
+      named latency profiles, deterministic fault injection, and token
+      accounting. Stress harness reports p50/p95/p99 plus four outcome buckets;
+      faults are scoped context managers so a profile cannot leak into the next
+      run. Verified: `examples/02_repeatability.py` passes 30/30 identical
+      across two concurrent runs *and* against a serial run.
+      Three decisions worth remembering, because later chapters depend on them:
+      - **Randomness is derived per request, not drawn from a shared RNG.**
+        A global seeded RNG is not reproducible under concurrency, because the
+        draw a request gets depends on thread order. `draw(seed, label, req_id)`
+        makes latency a property of the request. This is what lets the
+        repeatability check assert equality instead of "close enough".
+      - **Simulated and measured latency are reported side by side, always.**
+        Simulated is exact and reproducible; wall clock is not, and asserting
+        on it would make the test fail on a busy laptop. Per-request wall-clock
+        drift measured at ~4ms median, 16ms max.
+      - **Four outcome buckets, not two.** `wrong_source` is separate from
+        `error` because the day-one app already answers off-topic questions
+        confidently from irrelevant documents, and an availability metric scores
+        that as success. Found while writing the example, kept and named rather
+        than tuned away (AUTHORING-LESSONS §8).
+      The harness already separates a dead provider (40 requests failed in
+      140ms) from a slow one (same 0% correct, 15,180ms), which is ch06's
+      argument arriving before ch06 was written.
 - [ ] **M2, ch01 the provider seam**: inline SDK calls at every call site vs a
       single seam. Stressor: three requirement changes applied to both (swap
       provider, add timeout and retry, add per-request cost accounting).
