@@ -52,7 +52,6 @@ exactly the artifact a senior engineer is asked to produce.
 
 ## Run it
 
-The reference app and the measuring instrument exist; the chapters do not yet.
 Everything below is offline, needs no key, and costs nothing.
 
 ```bash
@@ -65,6 +64,9 @@ python check_setup.py
 python examples/00_reference_app.py    # the app, one request at a time
 python examples/01_stress_harness.py   # the same workload under five pressures
 python examples/02_repeatability.py    # proves the numbers reproduce
+
+python ch01-provider-seam/fairness.py  # chapter 1: are the variants the same app?
+python ch01-provider-seam/measure.py   # chapter 1: what did each change cost?
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -94,7 +96,7 @@ and show the spread.
 
 | # | The decision | The stressor | Status |
 |---|--------------|--------------|--------|
-| 1 | Inline provider calls vs one seam | Three requirement changes, count the diff | planned |
+| 1 | [Inline provider calls vs one seam](ch01-provider-seam/) | Five requirement changes, count the diff | **done**, [ADR](ch01-provider-seam/ADR.md) |
 | 2 | Conversation state in-process vs shared | A second worker | planned |
 | 3 | Hold the connection vs queue the work | Concurrent slow requests | planned |
 | 4 | Model in-process vs its own tier | The hop, then the fleet argument | planned |
