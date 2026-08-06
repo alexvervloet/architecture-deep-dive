@@ -320,6 +320,35 @@ def _answer_from_context(user: str, context: str) -> str:
     return best.rstrip(".") + "."
 
 
+_CLASSES = {
+    "billing": ("refund", "charge", "invoice", "billing", "cancel", "plan", "price", "pricing"),
+    "security": ("password", "two-factor", "2fa", "sso", "login", "audit"),
+    "reliability": ("down", "outage", "status", "incident", "slow", "error", "429"),
+}
+
+
+def _mock_text(system: str, user: str) -> str:
+    """What the mock 'model' returns, dispatched on markers in the system prompt.
+
+    Three modes, because the ch01 app calls a model in three places and a
+    single-mode mock would make those call sites indistinguishable. All three
+    are extractive or rule-based, so an answer is right or wrong for a reason a
+    reader can check by hand.
+    """
+    if "CLASSIFY" in system:
+        haystack = user.lower()
+        for label, words in _CLASSES.items():
+            if any(w in haystack for w in words):
+                return label
+        return "other"
+    if "SUMMARIZE" in system:
+        first = user.replace("\n", " ").split(". ")[0].strip()
+        return (first.rstrip(".") + ".") if first else ""
+    if "CONTEXT:" in system:
+        return _answer_from_context(user, system.split("CONTEXT:", 1)[1])
+    return _answer_from_context(user, user)
+
+
 def _mock_generate(
     system: str, user: str, *, request_id: str, attempt: int, timeout_ms: float | None
 ) -> LLMResponse:
@@ -349,8 +378,7 @@ def _mock_generate(
     time.sleep(simulated_ms / 1000.0)
     measured_ms = (time.perf_counter() - start) * 1000.0
 
-    context = system.split("CONTEXT:", 1)[1] if "CONTEXT:" in system else ""
-    answer = _answer_from_context(user, context)
+    answer = _mock_text(system, user)
     return LLMResponse(
         text=answer,
         model=_MOCK_MODEL,
