@@ -9,7 +9,7 @@ restart one.
 ## Run it
 
 ```bash
-python ch02-state/stress.py     # offline, no key, ~90 seconds
+python ch02-state/stress.py     # offline, no key, ~15 seconds
 ```
 
 Real OS processes, not threads. Threads share memory, so a thread-based version
