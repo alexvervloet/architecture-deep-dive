@@ -126,12 +126,28 @@ reader takes to a design review.
         comments, and blanks excluded (each version carries a different header,
         so counting prose would measure the author); a modified line counts as
         two. Raw counts printed alongside.
-- [ ] **M3, ch02 where conversation state lives**: in-process dict vs a shared
-      store. Stressor: two workers behind one entry point, same session id.
-      Measure: percentage of turns whose history silently vanished. Expected
-      to be a clean falsification of the single-worker mental model; if the
-      loss rate is not stark, the chapter says so and reports what it took to
-      make it stark. Pairs with context-engineering-deep-dive.
+- [x] **M3, ch02 where conversation state lives** (done 2026-08-06; see
+      ch02-state/ADR.md). Three designs, not two: sticky routing is a real fix
+      that real teams ship, and leaving it out would have been a strawman.
+      Real OS processes, because threads share memory and would have shown the
+      dict working perfectly.
+      Correctness by worker count (memory+spread): 100 / 92 / 62%, and 58%
+      after restarting one worker. Sticky held 100% through scale-out and fell
+      to 96% on the restart. SQLite cost 0.47ms/turn against 0.008ms.
+      - **The bug is half-invisible even when it fires.** At 4 workers only 29%
+        of follow-ups saw history but 62% were still correct, because some
+        follow-ups retrieve fine on their own. That gap is why this survives
+        code review: it looks like model noise.
+      - **Two things went wrong and are written up in LESSONS.md**: a lenient
+        metric ("gold doc in the retrieved set") reported 100% correct on a
+        visibly broken app, fixed by scoring answer provenance; and hard-killing
+        a worker deadlocked the harness through a shared mp.Queue, fixed with a
+        Manager queue plus timeouts on every blocking get.
+      - **One conversation template was cut**, not kept: it needed two-hop
+        retrieval and failed even with perfect history, which would have put a
+        permanent error floor under every column.
+      - Verified reproducible: every correctness and history figure is identical
+        across runs; only the wall-clock store column moves.
 - [ ] **M4, ch03 sync request vs queued work**: hold the connection vs accept,
       queue, and poll or stream. Stressor: N concurrent agent runs against the
       slow provider profile. Measure: p95, timeout rate, connections held, and
