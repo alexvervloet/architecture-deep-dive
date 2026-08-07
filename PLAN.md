@@ -148,12 +148,28 @@ reader takes to a design review.
         permanent error floor under every column.
       - Verified reproducible: every correctness and history figure is identical
         across runs; only the wall-clock store column moves.
-- [ ] **M4, ch03 sync request vs queued work**: hold the connection vs accept,
-      queue, and poll or stream. Stressor: N concurrent agent runs against the
-      slow provider profile. Measure: p95, timeout rate, connections held, and
-      the cost of a client disconnect (work lost vs resumable). The reason
-      this is LLM-specific: request time is seconds to minutes, so the shape
-      that works for CRUD stops working at single-digit concurrency.
+- [x] **M4, ch03 sync vs queued work** (done 2026-08-07; see
+      ch03-queue/ADR.md). Three designs again: load shedding earns its place
+      and beat both others on latency and cost.
+      Burst of 32 against 8 workers, 3s deadline: **all three answered exactly
+      15**. Throughput is capacity, not front-door shape. What the shape decides
+      is the fate of the other 17: sync destroys them ($0.00106 billed for work
+      that finished after the client left), queue preserves them (32/32
+      retrievable), shed never starts them.
+      - **Shedding won latency because it stopped lying**: p50 1254ms vs sync's
+        3002ms, and half the spend ($0.00104 vs $0.00202) for the same 15
+        answers.
+      - **The percentile definition decided the headline.** Scoring latency over
+        answered requests only put sync at p95 2277ms and hid the problem
+        entirely; including abandoned requests moved it to 3007ms. This is the
+        exact trap called out in stress/harness.py during M1, and I walked into
+        it anyway. Fixed by making abandoned count and rejected not.
+      - **Connection-seconds is the resource metric that matters**: 75.6 vs 0.3,
+        a factor of 224. Peak-concurrency was dropped as a headline because
+        synchronized polling makes it an artifact.
+      - **Expected wobble, got none.** Two runs gave identical counts, spend,
+        waste, and connection-seconds; only p50/p95 moved by a few ms. Written
+        up as a property of this workload, not a guarantee.
 - [ ] **M5, ch04 the model as its own tier**: in-process model call vs a
       separate inference service (Ollama as the real second tier). Measure the
       added hop honestly, then measure what the tier buys that the number
