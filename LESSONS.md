@@ -24,6 +24,28 @@ than judged because the mock is extractive. Correctness immediately separated:
 exactly as predicted, suspect the metric before the mechanism. The tell was
 the two columns disagreeing, not either column on its own.
 
+## 2026-08-07, ch04: measuring a small thing by differencing two big ones
+
+**Expected:** the cost of the model-tier hop could be read off as the
+difference between end-to-end request medians for the two designs.
+
+**What happened:** the answer moved between 0.86ms and 2.73ms across runs, a
+3x swing on the chapter's headline number. The reference app's retrieval stage
+has ~10ms of jitter, which is several times the hop being measured, so
+differencing two totals mostly measured the jitter. Nothing looked broken; the
+number was just quietly unreliable, and either value would have been believed.
+
+**Fix:** move the timer inside the app, around the model call alone, and
+return it in the response. Retrieval is then not in the measurement at all.
+The hop came out at 1.45ms, and the chapter now prints both the isolated
+figure and the end-to-end difference so the reader can see why the second one
+is not used.
+
+**Next time:** never estimate a small quantity as the difference of two larger
+noisy ones. Instrument the boundary itself. The warning sign was rerunning and
+getting a materially different headline, which is worth treating as a
+measurement bug rather than as noise to be averaged away.
+
 ## 2026-08-06, ch02: hard-killing a worker deadlocked the whole harness
 
 **Expected:** `Process.terminate()` on an idle worker, to simulate an OOM kill
