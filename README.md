@@ -67,6 +67,7 @@ python examples/02_repeatability.py    # proves the numbers reproduce
 
 python ch01-provider-seam/fairness.py  # chapter 1: are the variants the same app?
 python ch01-provider-seam/measure.py   # chapter 1: what did each change cost?
+python ch02-state/stress.py            # chapter 2: start a second worker
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -97,7 +98,7 @@ and show the spread.
 | # | The decision | The stressor | Status |
 |---|--------------|--------------|--------|
 | 1 | [Inline provider calls vs one seam](ch01-provider-seam/) | Five requirement changes, count the diff | **done**, [ADR](ch01-provider-seam/ADR.md) |
-| 2 | Conversation state in-process vs shared | A second worker | planned |
+| 2 | [Conversation state in-process vs shared](ch02-state/) | A second worker, then a restart | **done**, [ADR](ch02-state/ADR.md) |
 | 3 | Hold the connection vs queue the work | Concurrent slow requests | planned |
 | 4 | Model in-process vs its own tier | The hop, then the fleet argument | planned |
 | 5 | What streaming costs your guardrails | A response that turns unsafe midway | planned |
