@@ -58,19 +58,38 @@ class SqliteStore:
 
     name = "sqlite (shared)"
 
+    @staticmethod
+    def initialize(path: str) -> None:
+        """Create the database once, from one process, before any worker starts.
+
+        This is not tidiness. `PRAGMA journal_mode=WAL` needs exclusive access
+        to the file, and it does not honour `busy_timeout` on that path: when
+        several freshly started workers all try to set it on the same new
+        database, one wins and the rest get "database is locked" immediately.
+        It is a race, so it passed for several runs before failing.
+        """
+        conn = sqlite3.connect(path, timeout=30.0)
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")  # concurrent readers + one writer
+            conn.execute(
+                "CREATE TABLE IF NOT EXISTS turns ("
+                "  session_id TEXT NOT NULL,"
+                "  seq        INTEGER NOT NULL,"
+                "  role       TEXT NOT NULL,"
+                "  content    TEXT NOT NULL,"
+                "  PRIMARY KEY (session_id, seq))"
+            )
+            conn.commit()
+        finally:
+            conn.close()
+
     def __init__(self, path: str) -> None:
         self.path = path
+        # Workers open an already-initialized database: no DDL, no journal-mode
+        # change, and a busy timeout so ordinary write contention waits instead
+        # of failing.
         self.conn = sqlite3.connect(path, timeout=30.0)
-        self.conn.execute("PRAGMA journal_mode=WAL")  # concurrent readers + one writer
-        self.conn.execute(
-            "CREATE TABLE IF NOT EXISTS turns ("
-            "  session_id TEXT NOT NULL,"
-            "  seq        INTEGER NOT NULL,"
-            "  role       TEXT NOT NULL,"
-            "  content    TEXT NOT NULL,"
-            "  PRIMARY KEY (session_id, seq))"
-        )
-        self.conn.commit()
+        self.conn.execute("PRAGMA busy_timeout=30000")
 
     def load(self, session_id: str) -> list[Turn]:
         rows = self.conn.execute(

@@ -20,7 +20,14 @@ import os
 from dataclasses import dataclass
 
 from app import providers, retrieval
-from stores import DESIGNS, Design, db_path_for, make_store, route  # noqa: F401
+from stores import (  # noqa: F401
+    DESIGNS,
+    Design,
+    SqliteStore,
+    db_path_for,
+    make_store,
+    route,
+)
 
 
 @dataclass
@@ -88,8 +95,11 @@ class Fleet:
         self.workers = workers
         self.seed = seed
         self.db_path = db_path_for(tag)
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+        for suffix in ("", "-wal", "-shm"):
+            if os.path.exists(self.db_path + suffix):
+                os.remove(self.db_path + suffix)
+        if design.store == "sqlite":
+            SqliteStore.initialize(self.db_path)
         self.ctx = mp.get_context("spawn")
         # A Manager queue, not a plain mp.Queue, and this is not a style choice.
         # `restart()` hard-kills a worker. A plain Queue is shared memory plus a
@@ -165,8 +175,9 @@ class Fleet:
             if proc.is_alive():
                 proc.terminate()
         self.manager.shutdown()
-        if os.path.exists(self.db_path):
-            os.remove(self.db_path)
+        for suffix in ("", "-wal", "-shm"):
+            if os.path.exists(self.db_path + suffix):
+                os.remove(self.db_path + suffix)
 
 
 def build_requests(rounds: int, conversations) -> list[Request]:
