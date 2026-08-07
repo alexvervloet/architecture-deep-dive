@@ -170,12 +170,31 @@ reader takes to a design review.
       - **Expected wobble, got none.** Two runs gave identical counts, spend,
         waste, and connection-seconds; only p50/p95 moved by a few ms. Written
         up as a property of this workload, not a guarantee.
-- [ ] **M5, ch04 the model as its own tier**: in-process model call vs a
-      separate inference service (Ollama as the real second tier). Measure the
-      added hop honestly, then measure what the tier buys that the number
-      cannot show: warm weights, batching, GPU scheduling, and blast radius
-      when the model tier dies. This is the chapter most likely to produce an
-      uncomfortable result; keep it (§8).
+- [x] **M5, ch04 the model as its own tier** (done 2026-08-07; see
+      ch04-model-tier/ADR.md). **The open question below is resolved: the
+      chapter stays.** It was written expecting to lose and did not.
+      Real subprocesses, real sockets; only model latency is simulated, and
+      identically on both sides.
+      - **The hop costs 1.45ms**, timed around the model call alone, which is
+        **0.13%** of a realistic 1158ms request. Not "worse on every number";
+        worse by a tenth of a percent.
+      - **Blast radius is the whole purchase.** Model killed with os._exit
+        (an OOM kill, not a catchable exception): in-process scores 0/10 on
+        /health and 0/10 on a cached /status, because they were the same
+        process. Tiered scores 10/10 on both and fails /ask in milliseconds
+        with a stated reason. Neither can answer without a model, and the
+        table says so.
+      - **A measurement bug nearly set the headline.** Differencing end-to-end
+        medians gave 0.86 to 2.73ms across runs, because retrieval jitter is
+        several times the hop. Fixed by instrumenting inside the app; both
+        figures are printed so the reader sees why one is unused. In LESSONS.md.
+      - **Batching is arithmetic, not measurement**, and is labelled that way
+        in its own section heading: the repo cannot measure a provider's fixed
+        per-call overhead, so it emits the break-even threshold instead.
+      - **The fleet arguments are named and explicitly not counted**: GPU
+        utilisation, independent scaling, one copy of the weights, rolling a
+        model version. Probably larger than anything measured; no claim rests
+        on them.
 - [ ] **M6, ch05 what streaming costs the architecture**: you cannot unsend a
       token. Stressor: a response that turns unsafe partway through. Compare
       buffer-then-check, chunk-wise checking, and stream-with-retraction.
@@ -215,10 +234,11 @@ reader takes to a design review.
 - ch03: whether the queue is a real broker or an in-process worker pool with a
   durable store. Prefer the smaller one that still shows resumability; only
   reach for a broker if the lesson collapses without it.
-- ch04: whether the honest verdict makes this chapter worth its length. If the
-  measurable result is "worse locally, and the real payoff needs a fleet",
-  consider folding it into ch06 as a blast-radius section rather than padding
-  it to chapter size.
+- ~~ch04: whether the honest verdict makes this chapter worth its length~~,
+  resolved 2026-08-07: it does. The hop is 0.13% of a realistic request and
+  the containment result (0/10 vs 10/10 on requests that never needed a model)
+  is measurable on one laptop, so it did not need the fleet argument it was
+  expected to need.
 - ch09: how much of knowledge-desk to copy in. Prefer a minimal two-tenant
   corpus over porting real permission logic.
 - Whether the reference app should be the capstone's askrepo rather than a new
