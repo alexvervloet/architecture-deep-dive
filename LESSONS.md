@@ -24,6 +24,31 @@ than judged because the mock is extractive. Correctness immediately separated:
 exactly as predicted, suspect the metric before the mechanism. The tell was
 the two columns disagreeing, not either column on its own.
 
+## 2026-08-07, ch02: several workers racing to create the same SQLite database
+
+**Expected:** each worker process opening the shared database with
+`PRAGMA journal_mode=WAL` and `CREATE TABLE IF NOT EXISTS` was safe, since
+`sqlite3.connect(timeout=30)` waits for a busy database.
+
+**What happened:** `sqlite3.OperationalError: database is locked`, on a
+regression run, after the chapter had been written, committed, and rerun
+cleanly several times. Setting the journal mode needs exclusive access to the
+file and does not honour the busy timeout on that path, so when several
+freshly spawned workers hit a brand-new database at once, one wins and the
+rest fail immediately. A pure startup race, invisible most of the time.
+
+**Fix:** the parent creates and configures the database once before spawning
+anyone (`SqliteStore.initialize`). Workers only ever open an existing
+database, set `busy_timeout`, and run no DDL. Also clean up the `-wal` and
+`-shm` sidecar files, which the original teardown left behind. Three
+consecutive runs now pass with identical results.
+
+**Next time:** shared-store setup belongs to whoever starts the processes, not
+to the processes. And the loud-failure work from the earlier lesson paid for
+itself here: the timeout on `collect()` turned this into a clear
+"only 15/24 responses came back" message in seconds, instead of the hang it
+would have been a day earlier.
+
 ## 2026-08-07, ch04: measuring a small thing by differencing two big ones
 
 **Expected:** the cost of the model-tier hop could be read off as the
