@@ -28,7 +28,8 @@ import time
 from dataclasses import dataclass
 
 from app import providers, retrieval
-from app.corpus import DOCUMENTS_BY_ID
+# Correctness is defined once, in the reference app, so chapters stay comparable.
+from app.service import answered_from  # noqa: F401  (re-exported for runner.py)
 from stores import Turn  # chapter-local; stress.py puts this directory on sys.path
 
 SYSTEM_TEMPLATE = """You are the support assistant for a SaaS product.
@@ -87,20 +88,6 @@ CONVERSATIONS: tuple[Exchange, ...] = (
 # 4-in-24 error floor under every column, and a reader could not then tell
 # which failures came from lost state and which from a retriever that cannot
 # chain. Multi-hop retrieval is a real problem; it is not this chapter's.
-
-
-def answered_from(text: str, doc_id: str) -> bool:
-    """Did this answer actually come out of that document?
-
-    Not "was the right document retrieved". Retrieval returns three documents
-    and the gold one is usually among them even when the query is missing its
-    context, so scoring on the retrieved set reports 100% correct while the
-    user is being told the wrong thing. The question that matters is which
-    document the sentence came from, and because the mock is extractive, that
-    is checkable exactly rather than judged.
-    """
-    body = DOCUMENTS_BY_ID[doc_id].text.lower()
-    return text.rstrip(".").strip().lower() in body
 
 
 def build_query(history: list[Turn], question: str) -> str:

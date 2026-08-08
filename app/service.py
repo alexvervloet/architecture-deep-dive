@@ -27,6 +27,7 @@ import time
 from dataclasses import dataclass, field
 
 from app import providers, retrieval, tools
+from app.corpus import DOCUMENTS_BY_ID
 
 SYSTEM_TEMPLATE = """You are the support assistant for a SaaS product.
 Answer only from the context below. If the context does not contain the answer,
@@ -178,6 +179,27 @@ def reset_all() -> None:
     retrieval.reset_retrieval()
     tools.reset_tools()
     reset_sessions()
+
+
+def answered_from(text: str, doc_id: str) -> bool:
+    """Did this answer actually come out of that document?
+
+    Not "was the right document retrieved". Retrieval returns three documents
+    and the gold one is usually among them even when the query is wrong, so
+    scoring on the retrieved set reports success while the user is being told
+    something else. Because the mock is extractive, provenance is checkable
+    exactly rather than judged.
+
+    Lives here rather than in a chapter because two chapters need the same
+    definition of correct, and two definitions would make their numbers
+    incomparable. Chapter 6 in particular depends on it being strict: an
+    answer served from a stale cache is *not* supported by the current
+    document, and must not score as correct.
+    """
+    document = DOCUMENTS_BY_ID.get(doc_id)
+    if document is None:
+        return False
+    return text.rstrip(".").strip().lower() in document.text.lower()
 
 
 def gold_source(question: str) -> str:
