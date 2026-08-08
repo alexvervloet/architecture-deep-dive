@@ -195,11 +195,34 @@ reader takes to a design review.
         utilisation, independent scaling, one copy of the weights, rolling a
         model version. Probably larger than anything measured; no claim rests
         on them.
-- [ ] **M6, ch05 what streaming costs the architecture**: you cannot unsend a
-      token. Stressor: a response that turns unsafe partway through. Compare
-      buffer-then-check, chunk-wise checking, and stream-with-retraction.
-      Measure: time to first token against bytes already delivered when the
-      guard fires. Reuses the prompt-injection dive's cases.
+- [x] **M6, ch05 what streaming costs the architecture** (done 2026-08-07; see
+      ch05-streaming/ADR.md). Four placements, not three: a hold-back window
+      was added because buffer-versus-stream is a false choice, and the window
+      is what production actually ships.
+      - **Catching and preventing are different columns, and that is the
+        chapter.** The honest streaming build (guard all text so far) detected
+        5/5 violations and prevented 0/5, leaking 99 characters. A pattern is
+        only recognisable once complete, and completing it is what the last
+        delivered token did.
+      - **Guarding the chunk you were handed detects nothing**: 0/5. A
+        4-character token cannot contain an email address. Not a straw man, it
+        is what a streaming callback naturally invites.
+      - **window(8): 5/5 caught, 5/5 contained, 0 leaked, 200ms TTFT** against
+        buffering's 1875ms. Same safety, ~9x better first-token latency. And
+        buffering charges its latency to the clean responses too (1175ms vs
+        225ms), which is most of the traffic.
+      - **The sweep is the deliverable, not the number 8.** Hold size is a
+        function of the longest pattern the guard must recognise (32 chars here
+        = 8 tokens). Stated as a method to re-derive, not a constant.
+      - **A regex gap nearly became an architecture finding**: the api_key
+        pattern missed `sk-live-...` because the alphanumeric run stops at the
+        second hyphen, making one case invisible to all four designs at once.
+        Found and fixed before the numbers were taken; noted in cases.py.
+      - **Retraction was deliberately not implemented as a fifth design.**
+        Sending "disregard that" is a UI action, not a guarantee: the bytes
+        were rendered and logged. Counting it as prevention would be counting a
+        wish.
+      - Output is byte-identical across runs (no RNG; timing is arithmetic).
 - [ ] **M7, ch06 degradation and failure isolation**: hard fail vs tiered
       fallback. Stressor: kill retrieval, kill the provider, then make the
       provider slow rather than dead (the harder fault). Measure uptime *and*
