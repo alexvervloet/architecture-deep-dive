@@ -223,12 +223,36 @@ reader takes to a design review.
         were rendered and logged. Counting it as prevention would be counting a
         wish.
       - Output is byte-identical across runs (no RNG; timing is arithmetic).
-- [ ] **M7, ch06 degradation and failure isolation**: hard fail vs tiered
-      fallback. Stressor: kill retrieval, kill the provider, then make the
-      provider slow rather than dead (the harder fault). Measure uptime *and*
-      answer correctness under each fault, because a fallback that answers
-      confidently without sources trades an outage for a wrong answer. Report
-      both numbers or the chapter is propaganda.
+- [x] **M7, ch06 degradation and failure isolation** (done 2026-08-07; see
+      ch06-degradation/ADR.md). Six scenarios, three designs. Reuses
+      stress/harness.py from M1 rather than building new machinery, which is
+      the first time that investment paid off directly.
+      - **Three grades, not two.** exact / supported / unsupported, graded
+        against what the healthy pipeline itself answers (computed at startup,
+        not hand-written) so no design can score by dumping a document. Two
+        grades would have forced every degraded answer into "fine" or "wrong"
+        when most are neither.
+      - **Retrieval down: availability 0% -> 100%, correctness -> 17%.** Twenty
+        of 24 answers came confidently from a stale snapshot (link valid "24
+        hours" vs the live "30 minutes"), with nothing in the response marking
+        it. That is the chapter.
+      - **The fallback also has a genuinely good case**, reported as plainly as
+        the bad one: under 40% flaky, tiered answers 24/24 with 20 exact
+        against hard fail's 17/24.
+      - **The breaker is a capacity device whose payoff scales with fault
+        length**: 1.5x wall-clock saving over 24 requests, 2.9x over 48, and
+        **zero p95 improvement in either**. Requests hitting an open breaker
+        were already fast; the ones that tripped it had already paid the
+        deadline. Worth citing against the folklore.
+      - **An artifact named rather than hidden**: the snippet tier scores 11/24
+        "exact" under a dead model only because this repo's model is
+        extractive, so the top document's first sentence sometimes *is* its
+        answer. Flagged in the ADR and in the script output as an upper bound.
+      - **A name collision worth knowing about**: the chapter script is
+        stress.py and the shared harness package is stress/. Python puts the
+        script's directory at sys.path[0], so the import resolved to itself.
+        Fixed by inserting the repo root ahead of it, with the reason in a
+        comment.
 - [ ] **M8, ch07 the offline pipeline**: embed and index at query time vs an
       ingest pipeline on a schedule. Measure: staleness window against
       per-request latency and embedding spend. Quantifies an antipattern that

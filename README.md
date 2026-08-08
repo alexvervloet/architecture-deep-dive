@@ -71,6 +71,7 @@ python ch02-state/stress.py            # chapter 2: start a second worker
 python ch03-queue/stress.py            # chapter 3: overload the worker pool
 python ch04-model-tier/stress.py       # chapter 4: price the hop, kill the model
 python ch05-streaming/stress.py        # chapter 5: guard a response as it streams
+python ch06-degradation/stress.py      # chapter 6: break each dependency in turn
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -105,7 +106,7 @@ and show the spread.
 | 3 | [Hold the connection vs queue the work](ch03-queue/) | A burst 4x the worker pool | **done**, [ADR](ch03-queue/ADR.md) |
 | 4 | [Model in-process vs its own tier](ch04-model-tier/) | Price the hop, then kill the model | **done**, [ADR](ch04-model-tier/ADR.md) |
 | 5 | [What streaming costs your guardrails](ch05-streaming/) | A response that turns unsafe midway | **done**, [ADR](ch05-streaming/ADR.md) |
-| 6 | Hard fail vs tiered degradation | Kill retrieval, then the provider, then just slow it | planned |
+| 6 | [Hard fail vs tiered degradation](ch06-degradation/) | Kill retrieval, then the provider, then just slow it | **done**, [ADR](ch06-degradation/ADR.md) |
 | 7 | Index at query time vs an ingest pipeline | Staleness against per-request cost | planned |
 | 8 | Rollout shape: shadow, canary, eval gate | A planted regression | planned |
 | 9 | Where the tenant boundary goes | A leak test | planned |
