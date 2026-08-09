@@ -74,6 +74,7 @@ python ch05-streaming/stress.py        # chapter 5: guard a response as it strea
 python ch06-degradation/stress.py      # chapter 6: break each dependency in turn
 python ch07-indexing/stress.py         # chapter 7: change documents under the index
 python ch08-rollout/stress.py          # chapter 8: ship a regression, see who catches it
+python ch09-tenancy/stress.py          # chapter 9: try to leak one tenant to another
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -111,7 +112,7 @@ and show the spread.
 | 6 | [Hard fail vs tiered degradation](ch06-degradation/) | Kill retrieval, then the provider, then just slow it | **done**, [ADR](ch06-degradation/ADR.md) |
 | 7 | [Index at query time vs an ingest pipeline](ch07-indexing/) | Edit the documents mid-run | **done**, [ADR](ch07-indexing/ADR.md) |
 | 8 | [Rollout shape: shadow, canary, eval gate](ch08-rollout/) | A planted regression | **done**, [ADR](ch08-rollout/ADR.md) |
-| 9 | Where the tenant boundary goes | A leak test | planned |
+| 9 | [Where the tenant boundary goes](ch09-tenancy/) | A leak test, then more tenants | **done**, [ADR](ch09-tenancy/ADR.md) |
 | 10 | The assembly: three products, same decisions | A latency and cost budget | planned |
 
 See [PLAN.md](PLAN.md) for the build order and the ground rules. Chapters land

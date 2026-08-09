@@ -303,10 +303,28 @@ reader takes to a design review.
         scales with them.
       - **A good change is rolled out too**, so no shape can score well by
         shipping nothing.
-- [ ] **M10, ch09 tenancy and permission boundaries**: filter after retrieval
-      vs filter inside retrieval vs an index per tenant. Stressor: a leak test
-      with documents that must never cross. Measure: leaks and the latency
-      cost of each boundary. Pairs with the knowledge-desk project.
+- [x] **M10, ch09 tenancy and permission boundaries** (done 2026-08-07; see
+      ch09-tenancy/ADR.md). Four placements, not three: filtering *after the
+      model* is the one that actually ships, because it is the only one that
+      asks nothing of the retrieval layer, and it is the one that leaks.
+      - **The leak is concrete**: Globex asked about password reset expiry and
+        was told Acme's negotiated 24-hour exception, verbatim. Citation list
+        clean, answer not.
+      - **The predicted recall loss did not appear** at 2 tenants / top-3, so
+        it was measured against what it depends on instead of being asserted.
+        The sweep found the condition: only at k=1, and it scales with tenants.
+      - **The best finding fell out of the sweep**: at k=1 the answers *lost*
+        by filtering after retrieval equal the answers *leaked* by filtering
+        after the model, exactly, at every point (1/3/7/15/31). One event, two
+        endings: a forbidden document ranks first, and you either serve it or
+        delete it and have nothing left.
+      - **Leak rate rises 6% to 12% then plateaus**, because it depends on how
+        often a forbidden doc wins first place, not how many exist. Stated
+        that way rather than as "grows with tenants".
+      - Leak detection is substring provenance, so the counts are a floor: a
+        real model paraphrasing would evade it. Said in the ADR.
+      - Synthetic tenants are templated for the sweep; the shape is
+        trustworthy, the absolute rates depend on how competitive I made them.
 - [ ] **M11, ch10 the assembly**: put the nine ADRs on one board, add a latency
       and cost budget, and derive a target architecture for three different
       products (a chat feature, a batch document pipeline, a voice agent).
