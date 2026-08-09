@@ -73,6 +73,7 @@ python ch04-model-tier/stress.py       # chapter 4: price the hop, kill the mode
 python ch05-streaming/stress.py        # chapter 5: guard a response as it streams
 python ch06-degradation/stress.py      # chapter 6: break each dependency in turn
 python ch07-indexing/stress.py         # chapter 7: change documents under the index
+python ch08-rollout/stress.py          # chapter 8: ship a regression, see who catches it
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -109,7 +110,7 @@ and show the spread.
 | 5 | [What streaming costs your guardrails](ch05-streaming/) | A response that turns unsafe midway | **done**, [ADR](ch05-streaming/ADR.md) |
 | 6 | [Hard fail vs tiered degradation](ch06-degradation/) | Kill retrieval, then the provider, then just slow it | **done**, [ADR](ch06-degradation/ADR.md) |
 | 7 | [Index at query time vs an ingest pipeline](ch07-indexing/) | Edit the documents mid-run | **done**, [ADR](ch07-indexing/ADR.md) |
-| 8 | Rollout shape: shadow, canary, eval gate | A planted regression | planned |
+| 8 | [Rollout shape: shadow, canary, eval gate](ch08-rollout/) | A planted regression | **done**, [ADR](ch08-rollout/ADR.md) |
 | 9 | Where the tenant boundary goes | A leak test | planned |
 | 10 | The assembly: three products, same decisions | A latency and cost budget | planned |
 

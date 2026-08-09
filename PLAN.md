@@ -278,10 +278,31 @@ reader takes to a design review.
         10/25/40), because round ticks landed on rebuild boundaries and handed
         some intervals a free worst-case lag of zero.
       - Output byte-identical across runs; ~4 seconds.
-- [ ] **M9, ch08 rollout as architecture**: versioned prompts, shadow traffic,
-      canary, and an eval gate in front of deploys. Stressor: plant a
-      regression in a prompt and see which shapes catch it before a user does,
-      and how many requests leak through each. Reuses the evals harness.
+- [x] **M9, ch08 rollout as architecture** (done 2026-08-07; see
+      ch08-rollout/ADR.md). Five shapes, two candidates, 600 requests each.
+      Both candidates are "spend fewer tokens on the context": one is safe
+      (14/14) and one breaks 3 of 14, and the diffs look the same.
+      - **The eval gate is a coin flip on its sample.** Two plausible
+        six-question suites: suite B blocks the regression at request 0 for 12
+        model calls; suite A ships it to everybody (129/600 bad) and reports a
+        clean pass. Running both is what makes this a finding about gates
+        rather than about one suite.
+      - **The canary caught what the suite missed and charged 8 bad answers
+        and 290 requests**, both set by signal noise rather than regression
+        size. Detection fired the instant it reached its 30th sample.
+      - **Shadow reported 64% disagreement against a true 21% breakage rate.**
+        Most of the gap is answers that changed and stayed correct, which is
+        exactly why disagreement is a flag for a human and not a verdict. Costs
+        a second model call on every request.
+      - **Stacking is not redundancy**: gate A + canary scored identically to
+        canary alone, because the gate contributed nothing when its suite
+        missed. That is the argument for both, and the table shows it.
+      - **Feedback is modelled as a noisy thumbs-down (60%/3%), not a gold
+        label.** Nearly every difference between the shapes comes from that one
+        choice; the ADR names the invented constants and says detection latency
+        scales with them.
+      - **A good change is rolled out too**, so no shape can score well by
+        shipping nothing.
 - [ ] **M10, ch09 tenancy and permission boundaries**: filter after retrieval
       vs filter inside retrieval vs an index per tenant. Stressor: a leak test
       with documents that must never cross. Measure: leaks and the latency
