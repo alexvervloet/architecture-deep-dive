@@ -24,6 +24,36 @@ than judged because the mock is extractive. Correctness immediately separated:
 exactly as predicted, suspect the metric before the mechanism. The tell was
 the two columns disagreeing, not either column on its own.
 
+## 2026-08-07, ch07: the experiment ran, produced a clean table, and measured nothing
+
+**Expected:** editing a document mid-run would make a stale index give a wrong
+answer, so correctness would separate the index strategies.
+
+**What happened:** a scheduled index sitting nine ticks behind the corpus
+scored a perfect 60/60. The edits changed sentences the keyword retriever
+never selected, so the app kept quoting an unchanged sentence from the same
+document and scored correct. The staleness was completely real and the metric
+could not see any of it. Nothing errored, and the table looked plausible
+enough that the only reason to doubt it was noticing that a nine-tick lag with
+zero wrong answers makes no sense.
+
+There was a second, separate version of the same fault in the same chapter:
+three workload questions retrieved a competing document even against a
+perfectly fresh index, putting a 12-in-60 error floor under every column and
+making staleness indistinguishable from ordinary retrieval failure.
+
+**Fix:** `assert_edits_are_visible()` runs at startup and refuses to produce a
+table unless every edit changes the answer to at least one workload question.
+The three floor-producing questions were reworded against the same documents.
+Both fixes live in the code with the reason attached.
+
+**Next time:** an experiment needs a check that its independent variable
+actually reaches the metric, and that check belongs in the harness rather than
+in the author's head. Before trusting a comparison, verify that the thing being
+varied can change the number at all. A floor or a ceiling will otherwise
+quietly swallow the effect, and the ceiling is much harder to notice, because a
+perfect score reads as good news.
+
 ## 2026-08-07, ch02: several workers racing to create the same SQLite database
 
 **Expected:** each worker process opening the shared database with
