@@ -253,10 +253,31 @@ reader takes to a design review.
         script's directory at sys.path[0], so the import resolved to itself.
         Fixed by inserting the repo root ahead of it, with the reason in a
         comment.
-- [ ] **M8, ch07 the offline pipeline**: embed and index at query time vs an
-      ingest pipeline on a schedule. Measure: staleness window against
-      per-request latency and embedding spend. Quantifies an antipattern that
-      the RAG dive only warns about.
+- [x] **M8, ch07 the offline pipeline** (done 2026-08-07; see
+      ch07-indexing/ADR.md). Four strategies, not two: build-at-boot is the one
+      most code ships by accident, and write-through is what actually wins.
+      Uses the `updated_at` field reserved in app/corpus.py during M1.
+      - **Write-through matched per-request correctness (60/60) at one
+        fifteenth of the embedding calls** (4 vs 60), because its work scales
+        with the edit rate rather than the query rate. Per-request indexing
+        adds 36ms and $0.000012 to every request forever to catch three edits.
+      - **Build-at-boot was worst**: 13/60 confidently obsolete and never
+        catching up. Its staleness clock is the deploy cadence, so it degrades
+        as a service stabilises.
+      - **Read worst-lag, not correctness.** Correctness scales with how often
+        the workload asks about an edited document (6 of 14 here, stated in the
+        code); lag is a property of the schedule alone. The sweep has no knee,
+        which is said rather than implied.
+      - **The chapter measured nothing on its first run and looked fine doing
+        it.** A scheduled index nine ticks behind scored 60/60, because the
+        edits changed sentences the retriever never quoted. Separately, three
+        questions failed against a *fresh* index, putting a 12/60 floor under
+        every column. Both fixed; `assert_edits_are_visible()` now refuses to
+        print a table unless every edit changes an answer. In LESSONS.md.
+      - **Edit ticks are coprime with the sweep intervals** (11/27/43, not
+        10/25/40), because round ticks landed on rebuild boundaries and handed
+        some intervals a free worst-case lag of zero.
+      - Output byte-identical across runs; ~4 seconds.
 - [ ] **M9, ch08 rollout as architecture**: versioned prompts, shadow traffic,
       canary, and an eval gate in front of deploys. Stressor: plant a
       regression in a prompt and see which shapes catch it before a user does,
