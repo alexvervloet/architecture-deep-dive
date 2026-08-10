@@ -116,10 +116,16 @@ and show the spread.
 | 9 | [Where the tenant boundary goes](ch09-tenancy/) | A leak test, then more tenants | **done**, [ADR](ch09-tenancy/ADR.md) |
 | 10 | [The assembly: three products, same decisions](ch10-assembly/) | A latency and cost budget | **done**, [ADR](ch10-assembly/ADR.md) |
 
-See [PLAN.md](PLAN.md) for the build order and the ground rules. Chapters land
-incrementally; the status column is the source of truth. A chapter is not
-"done" until its ADR cites a run that actually happened, per the series'
-[authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
+No chapter is "done" until its ADR cites a run that actually happened, per the
+series' [authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
+CI runs every one of these experiments on push, so the numbers in the ADRs are
+checked rather than remembered.
+
+Then: [**EXERCISES.md**](EXERCISES.md), predict-then-run for every chapter
+(several of them reproduce this repo's own mistakes on purpose) ·
+[**TEXTBOOK.md**](TEXTBOOK.md), the lecture version ·
+[**LESSONS.md**](LESSONS.md), the four times the measurement was wrong before
+the code was.
 
 ## Where it slots into the series
 
