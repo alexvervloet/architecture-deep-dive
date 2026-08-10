@@ -1,0 +1,76 @@
+name: CI
+
+# Unusually for this series, CI here runs the actual experiments. Every
+# stressor in this repo is offline, keyless, and finishes in under a minute,
+# so there is no reason to settle for "it imports". A green check means every
+# chapter's measurement still runs end to end and its assertions still hold,
+# which is the only promise the ADRs rest on.
+#
+# Two of the chapters assert rather than report, and those are the ones worth
+# having here: examples/02_repeatability.py exits non-zero if the same workload
+# stops producing identical results, and ch07 refuses to run at all if its
+# edits no longer change any answer.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run-the-experiments:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: pip install -r requirements.txt
+
+      - name: Setup check
+        run: python check_setup.py
+
+      - name: Compile every chapter
+        run: >
+          python -m compileall -q app stress examples
+          ch01-provider-seam ch02-state ch03-queue ch04-model-tier
+          ch05-streaming ch06-degradation ch07-indexing ch08-rollout
+          ch09-tenancy ch10-assembly
+
+      # Asserts. These exit non-zero when the repo's central claim breaks.
+      - name: Determinism holds
+        run: python examples/02_repeatability.py
+
+      - name: Chapter 1, the variants are the same app
+        run: python ch01-provider-seam/fairness.py
+
+      # Reports. A crash here means a chapter's measurement no longer runs.
+      - name: Chapter 1, count the diff
+        run: python ch01-provider-seam/measure.py
+      - name: The reference app
+        run: python examples/00_reference_app.py
+      - name: Chapter 2, a second worker
+        run: python ch02-state/stress.py
+      - name: Chapter 4, the hop and the blast radius
+        run: python ch04-model-tier/stress.py
+      - name: Chapter 5, guarding a stream
+        run: python ch05-streaming/stress.py
+      - name: Chapter 7, staleness
+        run: python ch07-indexing/stress.py
+      - name: Chapter 8, rollout
+        run: python ch08-rollout/stress.py
+      - name: Chapter 9, the leak test
+        run: python ch09-tenancy/stress.py
+
+      # The two slow ones. Both sleep through simulated model latency rather
+      # than doing work, so they are cheap in CPU and expensive in wall clock.
+      - name: Chapter 3, overload
+        run: python ch03-queue/stress.py
+      - name: Chapter 6, degradation
+        run: python ch06-degradation/stress.py
+      - name: Chapter 10, the assembly
+        run: python ch10-assembly/stress.py
