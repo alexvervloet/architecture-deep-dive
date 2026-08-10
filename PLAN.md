@@ -325,11 +325,32 @@ reader takes to a design review.
         real model paraphrasing would evade it. Said in the ADR.
       - Synthetic tenants are templated for the sweep; the shape is
         trustworthy, the absolute rates depend on how competitive I made them.
-- [ ] **M11, ch10 the assembly**: put the nine ADRs on one board, add a latency
-      and cost budget, and derive a target architecture for three different
-      products (a chat feature, a batch document pipeline, a voice agent).
-      Same decisions, three different answers, which is the whole point of the
-      dive.
+- [x] **M11, ch10 the assembly** (done 2026-08-07; see ch10-assembly/ADR.md).
+      Not a prose synthesis: `decide()` applies the nine ADRs to three product
+      profiles in code, `predict()` builds a budget from constants each earlier
+      chapter measured, and the assembled configurations are then run so the
+      budget can be checked.
+      - **Six of nine decisions differ; three do not.** The seam and the model
+        tier are right for an overnight batch job and a real-time voice agent
+        alike, because 1 line and 1.45ms are below what any budget notices.
+        The voice agent takes *in-process* state, contradicting ch02's headline
+        on purpose: a call is pinned to one worker, so ch02's failure cannot
+        occur.
+      - **Composition predicts the mean, exactly for fixed costs** (0.0ms error
+        on both windowed products) and 9% out for the one prediction containing
+        a distribution mean. Constants compose, distributions do not.
+      - **The budget cannot predict the tail and the column is left empty.**
+        Every constant these chapters produced is a mean; support chat's mean
+        is 1198ms and its slowest request 4995ms, 4.2x. An earlier draft had
+        `"model_p95_ms": 3000` in the measured-constants table as if a chapter
+        had produced it. It had not. Removed rather than sourced, and the
+        absence is now the finding.
+      - **The surprise: architecture is nearly invisible in a latency budget.**
+        Six differing decisions, mean latencies within 36ms, because the model
+        is 98% of the request. The chapter closes by naming the columns the
+        decisions *were* worth (38 points of correctness, 10/10 health checks,
+        a leaked contract, 2.9x wall clock) and noting a review that only
+        budgets latency would have rejected all four.
 - [ ] **M12, series wiring**: EXERCISES.md (grown per chapter, may land
       earlier), TEXTBOOK.md chapter matching the series pattern, GitHub remote
       plus submodule in the parent repo, entries in the parent README,

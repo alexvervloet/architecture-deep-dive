@@ -75,6 +75,7 @@ python ch06-degradation/stress.py      # chapter 6: break each dependency in tur
 python ch07-indexing/stress.py         # chapter 7: change documents under the index
 python ch08-rollout/stress.py          # chapter 8: ship a regression, see who catches it
 python ch09-tenancy/stress.py          # chapter 9: try to leak one tenant to another
+python ch10-assembly/stress.py         # chapter 10: all nine decisions, three products
 ```
 
 Two results from the harness worth seeing before any chapter exists.
@@ -113,7 +114,7 @@ and show the spread.
 | 7 | [Index at query time vs an ingest pipeline](ch07-indexing/) | Edit the documents mid-run | **done**, [ADR](ch07-indexing/ADR.md) |
 | 8 | [Rollout shape: shadow, canary, eval gate](ch08-rollout/) | A planted regression | **done**, [ADR](ch08-rollout/ADR.md) |
 | 9 | [Where the tenant boundary goes](ch09-tenancy/) | A leak test, then more tenants | **done**, [ADR](ch09-tenancy/ADR.md) |
-| 10 | The assembly: three products, same decisions | A latency and cost budget | planned |
+| 10 | [The assembly: three products, same decisions](ch10-assembly/) | A latency and cost budget | **done**, [ADR](ch10-assembly/ADR.md) |
 
 See [PLAN.md](PLAN.md) for the build order and the ground rules. Chapters land
 incrementally; the status column is the source of truth. A chapter is not
