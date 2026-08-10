@@ -14,3 +14,6 @@ runs/*.jsonl
 # Editor / local history
 .history/
 .vscode/
+
+# Scratch: the build plan is a working file, never a repo artifact
+PLAN.md
