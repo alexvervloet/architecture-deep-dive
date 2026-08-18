@@ -1,4 +1,4 @@
-# Chapter 19: The Seams Between the Parts
+# Chapter 21: The Seams Between the Parts
 
 *This is the textbook chapter for the Architecture deep dive, a bonus that slots in after Production (8). Every other dive in this series teaches a component; this one teaches where the boundaries between them go, and what each boundary costs. The [README](README.md) is the lab manual and the ten ADRs are the findings; this is the lecture. It covers why architecture teaching usually degrades into slideware, the one discipline that stops it, and the ten decisions that come out differently when you insist on a number.*
 
