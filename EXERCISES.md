@@ -49,7 +49,7 @@ is the useful outcome.
 2. **Move the percentile definition and watch the conclusion move.** In
    `designs.py`, change `Stats.percentile` to default to `("answered",)` only.
    Sync's p95 drops from 3007ms to about 2277ms and the chapter's argument
-   quietly evaporates. This is the single most common way a latency number
+   evaporates. This is the single most common way a latency number
    lies.
 3. **Find the shed threshold that beats both.** `SheddingServer` takes
    `max_queue_depth`. Sweep it. There is a value that maximises answered
