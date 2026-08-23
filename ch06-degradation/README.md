@@ -43,7 +43,7 @@ minutes. Nothing in the response tells the user which one they got.
 answered with 20 exact against hard fail's 17/24. Partial failure is where this
 pattern is at its best, and that deserves saying as plainly as the bad news.
 
-**Model slow, not dead** is where the breaker earns its place, and only on
+**Model slow, not dead** is where the breaker pays for itself, and only on
 throughput:
 
 | scenario | hard fail | tiered | tiered + breaker |
