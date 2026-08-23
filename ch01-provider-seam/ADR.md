@@ -15,7 +15,7 @@ The usual argument for the seam is portability, and it is usually made without
 numbers. This chapter builds the same four-feature app both ways, applies five
 requirements to both, and counts the churn. Both variants are held to
 byte-identical output by `fairness.py`, so a smaller diff cannot be bought by
-quietly doing less.
+doing less.
 
 The five requirements, chosen because each one is a real thing that happens to
 an app in its first year:
@@ -98,7 +98,7 @@ What the line count missed is that the cost landed somewhere it cannot see:
   because retrying mid-stream means retracting tokens the caller already has.
   Neither design admits this in its signature.
 
-**The cost ledger broke quietly, and that was the most useful finding.**
+**The cost ledger broke without a sound, and that was the most useful finding.**
 `fairness.py` reports spend per build. Through v4 both variants agree exactly
 ($0.000099). At v5 they disagree: $0.000097 inline against $0.000100 seam.
 Neither is a bug. A streamed response carries no usage block, so both fell
