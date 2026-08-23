@@ -1,54 +1,51 @@
 # LLM App Architecture: A Guided Deep Dive
 
-Every other repo in this series teaches a **component**: the API call, the
-retriever, the agent loop, the guardrail, the eval. This one teaches the
-**seams between them**, which is the part nobody hands you and every design
-review asks about.
+Every other repo in this series teaches a component: the API call, the retriever, the agent
+loop, the guardrail, the eval. This one teaches the seams between them, which nobody hands
+you and every design review asks about.
 
-The question here is not "how do I build a retriever." You already built one.
-It is: *where does retrieval live, what happens to the request when it fails,
-who owns the conversation state when there are two workers, and what does it
-cost me to find out later that I put the boundary in the wrong place?*
+The question here is not "how do I build a retriever." You already built one. It is where
+retrieval lives, what happens to the request when it fails, who owns the conversation state
+once there are two workers, and what it costs you to find out later that you put the
+boundary in the wrong place.
 
 ## Why this dive exists
 
-An LLM app breaks in ways a CRUD app does not, and the breakages are
-structural rather than local:
+An LLM app breaks in ways a CRUD app does not, and the breakages are structural rather than
+local.
 
-- Requests take **seconds to minutes**, so the request/response shape that
-  works everywhere else falls over at single-digit concurrency.
-- The expensive dependency is **non-deterministic and occasionally down**, so
-  "retry and hope" is a design decision with a correctness cost, not a config
-  value.
-- You **cannot unsend a token**, so streaming moves your safety checks to a
-  place where they have less to work with.
-- The thing you are scaling is **weights on a GPU**, not stateless workers, so
-  the usual advice about splitting services inverts.
+- Requests take seconds to minutes, so the request-and-response shape that works everywhere
+  else falls over at single-digit concurrency.
+- The expensive dependency is non-deterministic and occasionally down, so "retry and hope"
+  is a design decision with a correctness cost rather than a config value.
+- You cannot unsend a token, so streaming moves your safety checks somewhere they have less
+  to work with.
+- The thing you are scaling is weights on a GPU rather than stateless workers, so the usual
+  advice about splitting services inverts.
 
-Those are architecture problems. They have answers, the answers conflict, and
-which one is right depends on numbers you can measure.
+Those are architecture problems. They have answers, the answers conflict, and which one is
+right depends on numbers you can measure.
 
 ## The method: decide, build both, stress, record
 
-Every chapter follows the same shape:
+Every chapter follows the same shape.
 
-1. **The decision.** One fork in the road, stated as a question with two
-   defensible answers.
-2. **Two builds.** The same app both ways. Same behaviour, different shape, so
-   any difference measured is attributable to the structure.
-3. **The stressor.** A script that applies the pressure the decision exists to
-   survive: a changed requirement, a burst of concurrency, a dead dependency,
-   a second worker. It runs offline, on one laptop, in under a minute.
-4. **The number.** What the stressor measured, including when it refutes what
-   the chapter expected.
-5. **The ADR.** An architecture decision record written from that run:
-   context, options, decision, consequences, and the conditions that would
-   flip the decision.
+1. **The decision.** One fork in the road, stated as a question with two defensible
+   answers.
+2. **Two builds.** The same app both ways. Same behaviour, different shape, so any
+   difference you measure comes from the structure.
+3. **The stressor.** A script that applies the pressure the decision exists to survive: a
+   changed requirement, a burst of concurrency, a dead dependency, a second worker. It runs
+   offline, on one laptop, in under a minute.
+4. **The number.** What the stressor measured, including when it refutes what the chapter
+   expected.
+5. **The ADR.** An architecture decision record written from that run, covering context,
+   options, decision, consequences, and the conditions that would flip the decision.
 
-The point is never "this architecture is correct." Half of these decisions
-reverse when a number changes, and the ADR names the number. What you get at
-the end is a folder of decision records backed by measurements, which is
-exactly the artifact a senior engineer is asked to produce.
+The point is never "this architecture is correct." Half of these decisions reverse when a
+number changes, and the ADR names the number. What you get at the end is a folder of
+decision records backed by measurements, which is exactly the artifact a senior engineer
+gets asked to produce.
 
 ## Run it
 
@@ -80,26 +77,25 @@ python ch10-assembly/stress.py         # chapter 10: all nine decisions, three p
 
 Two results from the harness worth seeing before any chapter exists.
 
-**A dead dependency and a slow one are not the same outage.** Same workload,
-same 0% correct answers, and the wall clock differs by two orders of
-magnitude: the dead provider fails 40 requests in 140ms, the slow one holds
-every worker until each request burns its full 3s deadline, taking 15,180ms.
-Anything that treats those alike is wrong about one of them.
+**A dead dependency and a slow one are not the same outage.** Same workload, same 0%
+correct answers, and the wall clock differs by two orders of magnitude. The dead provider
+fails 40 requests in 140ms. The slow one holds every worker until each request burns its
+full 3s deadline, taking 15,180ms. Anything that treats those alike is wrong about one of
+them.
 
-**The day-one app answers questions it has no source for.** Ask it about
-quantum entanglement and it replies fluently from a document about two-factor
-auth. It did not error, so an availability dashboard scores that request as a
-success. That is why the harness separates `wrong_source` from `error`, and
-why "answered at all" is never the headline number in these ADRs.
+**The day-one app answers questions it has no source for.** Ask it about quantum
+entanglement and it replies fluently from a document about two-factor auth. It did not
+error, so an availability dashboard scores that request as a success. That is why the
+stress harness separates `wrong_source` from `error`, and why "answered at all" is never
+the headline number in these ADRs.
 
-Determinism here is a specific claim, not a vibe. The same workload run twice,
-concurrently, produces identical answers, sources, failures, and *simulated*
-latency, and `02_repeatability.py` asserts exactly that, including a check that
-running at concurrency 1 changes nothing. Wall-clock latency is not
-reproducible and is never asserted on: per-request drift runs a few
-milliseconds, and the script prints it rather than hiding it. Claims that need
-to reproduce cite simulated time; claims about what a real machine did say so
-and show the spread.
+Determinism here is a specific claim rather than a vibe. The same workload run twice,
+concurrently, produces identical answers, sources, failures, and simulated latency.
+`02_repeatability.py` asserts exactly that, including a check that running at concurrency 1
+changes nothing. Wall-clock latency does not reproduce and never gets asserted on.
+Per-request drift runs a few milliseconds, and the script prints it rather than hiding it.
+Claims that need to reproduce cite simulated time. Claims about what a real machine did say
+so, and show the spread.
 
 ## The chapters
 
@@ -116,28 +112,26 @@ and show the spread.
 | 9 | [Where the tenant boundary goes](ch09-tenancy/) | A leak test, then more tenants | **done**, [ADR](ch09-tenancy/ADR.md) |
 | 10 | [The assembly: three products, same decisions](ch10-assembly/) | A latency and cost budget | **done**, [ADR](ch10-assembly/ADR.md) |
 
-No chapter is "done" until its ADR cites a run that actually happened, per the
-series' [authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
-CI runs every one of these experiments on push, so the numbers in the ADRs are
-checked rather than remembered.
+No chapter is done until its ADR cites a run that actually happened, per the series'
+[authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
+CI runs every one of these experiments on push, so the numbers in the ADRs are checked
+rather than remembered.
 
-Then: [**EXERCISES.md**](EXERCISES.md), predict-then-run for every chapter
-(several of them reproduce this repo's own mistakes on purpose) ·
-[**TEXTBOOK.md**](TEXTBOOK.md), the lecture version ·
-[**LESSONS.md**](LESSONS.md), the four times the measurement was wrong before
-the code was.
+Then: [EXERCISES.md](EXERCISES.md), predict-then-run for every chapter, several of which
+reproduce this repo's own mistakes on purpose · [TEXTBOOK.md](TEXTBOOK.md), the lecture
+version · [LESSONS.md](LESSONS.md), the four times the measurement was wrong before the
+code was.
 
 ## Where it slots into the series
 
-After [Production](https://github.com/alexvervloet/ai-in-production-deep-dive)
-(8). Production teaches the dozen lines around the model call that make one app
-safe, cheap, and observable; this dive asks where those lines live once there
-is more than one of everything. It pairs with
-[Observability](https://github.com/alexvervloet/observability-deep-dive) (the
-numbers the ADRs cite come from somewhere) and with
-[Professional Tools](https://github.com/alexvervloet/professional-tools-deep-dive)
-(several of these decisions are exactly what a framework decides for you).
+After [Production](https://github.com/alexvervloet/ai-in-production-deep-dive), #8.
+Production teaches the dozen lines around the model call that make one app safe, cheap, and
+observable. This dive asks where those lines live once there is more than one of everything.
+It pairs with [Observability](https://github.com/alexvervloet/observability-deep-dive),
+because the numbers the ADRs cite come from somewhere, and with
+[Professional Tools](https://github.com/alexvervloet/professional-tools-deep-dive), because
+several of these decisions are exactly what a framework decides for you.
 
-You want the components first. Reading this before you have hand-rolled a
-retriever and an agent loop gives you opinions without the experience to check
-them, which is the failure mode this whole series is built against.
+You want the components first. Reading this before you have hand-rolled a retriever and an
+agent loop gives you opinions without the experience to check them, which is the failure
+mode this whole series is built against.
