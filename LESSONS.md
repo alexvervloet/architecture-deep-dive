@@ -51,7 +51,7 @@ Both fixes live in the code with the reason attached.
 actually reaches the metric, and that check belongs in the harness rather than
 in the author's head. Before trusting a comparison, verify that the thing being
 varied can change the number at all. A floor or a ceiling will otherwise
-quietly swallow the effect, and the ceiling is much harder to notice, because a
+swallow the effect with nothing to show for it, and the ceiling is much harder to notice, because a
 perfect score reads as good news.
 
 ## 2026-08-07, ch02: several workers racing to create the same SQLite database
@@ -87,8 +87,8 @@ difference between end-to-end request medians for the two designs.
 **What happened:** the answer moved between 0.86ms and 2.73ms across runs, a
 3x swing on the chapter's headline number. The reference app's retrieval stage
 has ~10ms of jitter, which is several times the hop being measured, so
-differencing two totals mostly measured the jitter. Nothing looked broken; the
-number was just quietly unreliable, and either value would have been believed.
+differencing two totals mostly measured the jitter. Nothing looked broken. The
+number was unreliable and said nothing about it, and either value would have been believed.
 
 **Fix:** move the timer inside the app, around the model call alone, and
 return it in the response. Retrieval is then not in the measurement at all.
