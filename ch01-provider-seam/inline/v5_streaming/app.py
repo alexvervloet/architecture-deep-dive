@@ -77,7 +77,7 @@ def answer(
             if on_token is not None:
                 on_token(chunk)
     text = "".join(chunks).strip()
-    # Two things quietly changed here, and neither is a line of diff.
+    # Two things changed here, and neither is a line of diff.
     # 1. The retry loop is gone. Retrying a stream means retracting tokens the
     #    caller has already seen, which is a different problem, so this call
     #    site silently lost the reliability the previous version gave it.
