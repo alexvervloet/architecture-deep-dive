@@ -11,7 +11,7 @@ later and under deadline.
 So this version keeps the duplication, because that is what incremental change
 under a deadline actually produces, and because the honest comparison is
 between "no seam" and "seam", not between "seam" and "a seam introduced
-quietly halfway through a reliability fix".
+halfway through a reliability fix".
 """
 
 import time
