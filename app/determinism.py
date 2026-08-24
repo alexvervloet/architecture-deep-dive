@@ -3,7 +3,7 @@ app/determinism.py: reproducible randomness that survives concurrency.
 
 Every stressor in this repo runs the same workload twice and compares numbers.
 That only means something if the workload is *identical* both times, and the
-usual tool for that (seed a global RNG) quietly fails here, because the
+usual tool for that (seed a global RNG) fails here without a word, because the
 stressors are concurrent. With a shared `random.Random`, the draw a request
 gets depends on which thread reached the RNG first, so two runs of the same
 workload produce different per-request latencies and different failures. The
