@@ -19,15 +19,17 @@ is simulated, and identically on both sides.
 
 ## The result
 
-**The hop costs about 1ms.** Timed around the model call alone: 1.33ms
-in-process against 2.31ms tiered, for a median of 0.99ms across five trials
-and a range of 0.88 to 1.16ms. Against a realistic 1.3s model call, the tiered
-request medians 1154ms, so the boundary is **0.09%** of the request.
+**The hop costs about 1ms.** Timed around the model call alone, over five
+trials per run. Two runs here medianed 0.99ms and 0.95ms, spreading roughly
+0.6 to 1.3ms depending on what else the machine was doing. Against a realistic
+1.3s model call, the tiered request medians ~1155ms, so the boundary is
+**0.09%** of the request.
 
-That range is not decoration. This is the only figure in the repo that comes
-off a real clock instead of a simulated one, so it moves with the machine, and
-an earlier version of this chapter published it as a flat 1.45ms and was wrong
-within a few weeks. Re-run it on your own box; the ratio is what transfers.
+Read that as "about a millisecond, and 0.1% of a request", not as a constant.
+This is the only figure in the repo that comes off a real clock instead of a
+simulated one, so it moves with the machine. An earlier version of this chapter
+published it as a flat 1.45ms and was 40% wrong within a few weeks, which is
+why the run now prints its own trials and asserts on the ratio instead.
 
 **Then the model is killed with `os._exit`**, which is how an OOM kill
 arrives: no cleanup, no exception. Ten rounds of three requests, only one of

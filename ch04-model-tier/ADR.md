@@ -37,11 +37,13 @@ model call, and the failure containment is not obtainable any other way.
 
 ## Consequences, measured
 
-**The hop costs about 1ms.** Timed around the model call itself: 1.33ms
-in-process against 2.31ms tiered, for a real socket, real JSON encode and
-decode, real HTTP parse, and real cross-process scheduling. Five independent
-trials give a median of 0.99ms and a range of 0.88 to 1.16ms, and the chapter
-carries the range because this is wall clock on one machine.
+**The hop costs about 1ms.** Timed around the model call itself, for a real
+socket, real JSON encode and decode, real HTTP parse, and real cross-process
+scheduling. Two five-trial runs on the same machine give medians of 0.99ms and
+0.95ms, spreading 0.88 to 1.16 on an idle box and 0.56 to 1.34 with the rest of
+the suite running. Quote it as "about a millisecond". The spread is not noise
+to be averaged away, it is the resolution this measurement has, and the run
+prints its own trials so you can see yours.
 
 **Against a realistic model call, that is 0.09%.** With the 'slow' profile
 (~1.3s), the tiered request medians 1154ms. The boundary did not get more
@@ -75,8 +77,9 @@ between "the model is down" and "the product is down".
 **Batching break-even is arithmetic, not a measurement, and is labelled as
 such in the output.** A tier can batch concurrent calls; an in-process model
 in a worker cannot. With a fixed per-call overhead F amortised over a batch of
-N, the tier wins when `F * (1 - 1/N) > 0.99ms`, so F must exceed 1.97ms at
-N=2 and 1.02ms at N=32. The repo cannot measure F, because the mock has no
+N, the tier wins when `F * (1 - 1/N)` exceeds the hop, so at about 1ms F must
+exceed roughly 2ms at N=2 and roughly 1ms at N=32. The run prints the table
+against whatever it just measured. The repo cannot measure F, because the mock has no
 real per-call overhead to amortise. Read the table as a design tool: measure
 your provider's fixed overhead, and if it is below those numbers, batching is
 not the reason to split.
@@ -107,9 +110,10 @@ not the reason to split.
   timer inside the app around the model call alone. See LESSONS.md.
 - **The hop is wall clock, and instrumenting it did not make it a constant.**
   Moving the timer inside the app cut the spread by roughly half; it did not
-  remove it. Five trials still range from 0.88 to 1.16ms, and the figure this
-  ADR published on 2026-08-07 was 1.45ms, which no longer reproduces on the
-  machine that produced it. That is why the number here is a median with a
+  remove it. Five trials still spread over several tenths of a millisecond, and
+  how far depends on what else the machine is doing. The figure this ADR
+  published on 2026-08-07 was 1.45ms, which no longer reproduces on the machine
+  that produced it. That is why the number here is a median with a
   range, why the stressor asserts on the ratio instead, and why ch10 treats
   the hop as approximate when it composes a budget. Every other number in this
   repo is derived from simulated time and reproduces exactly; this one cannot,
