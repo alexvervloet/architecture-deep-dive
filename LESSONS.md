@@ -145,8 +145,9 @@ one stale measurement had quietly become five citations.
 
 Instrumenting the boundary had helped and I over-read it. It cut the spread
 roughly in half; it did not turn a wall-clock measurement into a constant. Five
-trials still range 0.88 to 1.16ms, and the number moves with whatever else the
-machine is doing.
+trials still spread over several tenths of a millisecond, and how far depends
+on what else the machine is doing: an idle run spread 0.88 to 1.16, the same
+run alongside the rest of the suite spread 0.56 to 1.34.
 
 **Fix:** the chapter now runs five trials and publishes a median with the
 range. The stressor asserts on the ratio (the hop as a share of a realistic

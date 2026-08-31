@@ -30,11 +30,11 @@ from dataclasses import dataclass
 MEASURED = {
     # ch04: in-process 1.33ms vs tiered 2.31ms, timed around the model call.
     # The one wall-clock constant in this table, so it is a median of five
-    # trials (range 0.88 to 1.16ms) rather than a point, and it is the only
-    # entry here that will differ on your machine. It contributes about a
-    # millisecond to a ~1300ms budget, so nothing below turns on its exact
-    # value; an earlier version of this file carried 1.45ms long after that
-    # stopped reproducing and no total moved enough to notice. See LESSONS.md.
+    # trials rather than a point, and it is the only entry here that will
+    # differ on your machine. It contributes about a millisecond to a ~1300ms
+    # budget, so nothing below turns on its exact value; an earlier version of
+    # this file carried 1.45ms long after that stopped reproducing, and no
+    # total moved enough for anyone to notice. See LESSONS.md.
     "model_tier_hop_ms": 0.99,
     # ch02: sqlite 0.47ms per turn against an in-process dict's 0.008ms.
     "shared_store_ms": 0.47,
