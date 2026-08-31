@@ -37,15 +37,19 @@ model call, and the failure containment is not obtainable any other way.
 
 ## Consequences, measured
 
-**The hop costs 1.45ms.** Timed around the model call itself: 1.31ms
-in-process against 2.75ms tiered, for a real socket, real JSON encode and
-decode, real HTTP parse, and real cross-process scheduling.
+**The hop costs about 1ms.** Timed around the model call itself: 1.33ms
+in-process against 2.31ms tiered, for a real socket, real JSON encode and
+decode, real HTTP parse, and real cross-process scheduling. Five independent
+trials give a median of 0.99ms and a range of 0.88 to 1.16ms, and the chapter
+carries the range because this is wall clock on one machine.
 
-**Against a realistic model call, that is 0.13%.** With the 'slow' profile
-(~1.3s), the tiered request medians 1158ms. The boundary did not get more
+**Against a realistic model call, that is 0.09%.** With the 'slow' profile
+(~1.3s), the tiered request medians 1154ms. The boundary did not get more
 expensive; the request got bigger. This is the number that resolves the
 chapter's open question: the split is not "measurably worse on every number",
-it is worse by a tenth of a percent.
+it is worse by a tenth of a percent. The ratio is also the part that survives
+a change of machine, which is why the stressor asserts on it and not on the
+milliseconds.
 
 **Killing the model kills the whole app when the model is in it.** The model
 process is terminated with `os._exit`, no cleanup and no exception, which is
@@ -65,14 +69,14 @@ the app is still there: it serves what it can, and the requests that genuinely
 need the model fail in milliseconds with a stated reason instead of a
 connection timeout.
 
-That is the entire purchase. 1.45ms per request buys the difference between
-"the model is down" and "the product is down".
+That is the entire purchase. A millisecond per request buys the difference
+between "the model is down" and "the product is down".
 
 **Batching break-even is arithmetic, not a measurement, and is labelled as
 such in the output.** A tier can batch concurrent calls; an in-process model
 in a worker cannot. With a fixed per-call overhead F amortised over a batch of
-N, the tier wins when `F * (1 - 1/N) > 1.45ms`, so F must exceed 2.90ms at
-N=2 and 1.50ms at N=32. The repo cannot measure F, because the mock has no
+N, the tier wins when `F * (1 - 1/N) > 0.99ms`, so F must exceed 1.97ms at
+N=2 and 1.02ms at N=32. The repo cannot measure F, because the mock has no
 real per-call overhead to amortise. Read the table as a design tool: measure
 your provider's fixed overhead, and if it is below those numbers, batching is
 not the reason to split.
@@ -84,7 +88,7 @@ not the reason to split.
 - **A hosted provider.** If the model is already an API call to somebody
   else's service, this decision was made for you and the tier is theirs. This
   chapter is about self-hosted weights.
-- **Sub-10ms end-to-end budgets.** Then 1.45ms is 15% and the arithmetic
+- **Sub-10ms end-to-end budgets.** Then the hop is 10% and the arithmetic
   inverts. That is not an LLM app.
 - **A team that cannot operate two processes.** The tier is only free if
   deploying, monitoring, and versioning a second service is already routine.
@@ -101,6 +105,15 @@ not the reason to split.
   reference app is several times larger than the boundary, so the estimate
   swung between 0.9ms and 2.7ms across runs. The number above comes from a
   timer inside the app around the model call alone. See LESSONS.md.
+- **The hop is wall clock, and instrumenting it did not make it a constant.**
+  Moving the timer inside the app cut the spread by roughly half; it did not
+  remove it. Five trials still range from 0.88 to 1.16ms, and the figure this
+  ADR published on 2026-08-07 was 1.45ms, which no longer reproduces on the
+  machine that produced it. That is why the number here is a median with a
+  range, why the stressor asserts on the ratio instead, and why ch10 treats
+  the hop as approximate when it composes a budget. Every other number in this
+  repo is derived from simulated time and reproduces exactly; this one cannot,
+  and saying so is cheaper than being quietly wrong later. See LESSONS.md.
 - **The crash is a process death, not an exception.** That is deliberate and
   it is the fair comparison: an in-process model that raises a catchable
   exception is recoverable and would show nothing here. The failures that

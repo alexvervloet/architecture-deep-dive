@@ -19,9 +19,15 @@ is simulated, and identically on both sides.
 
 ## The result
 
-**The hop costs 1.45ms.** Timed around the model call alone: 1.31ms in-process
-against 2.75ms tiered. Against a realistic 1.3s model call, the tiered request
-medians 1158ms, so the boundary is **0.13%** of the request.
+**The hop costs about 1ms.** Timed around the model call alone: 1.33ms
+in-process against 2.31ms tiered, for a median of 0.99ms across five trials
+and a range of 0.88 to 1.16ms. Against a realistic 1.3s model call, the tiered
+request medians 1154ms, so the boundary is **0.09%** of the request.
+
+That range is not decoration. This is the only figure in the repo that comes
+off a real clock instead of a simulated one, so it moves with the machine, and
+an earlier version of this chapter published it as a flat 1.45ms and was wrong
+within a few weeks. Re-run it on your own box; the ratio is what transfers.
 
 **Then the model is killed with `os._exit`**, which is how an OOM kill
 arrives: no cleanup, no exception. Ten rounds of three requests, only one of
@@ -34,8 +40,8 @@ which needs a model:
 
 Neither can answer a question without a model. The difference is everything
 else: in-process, the health check and the cached status response die too,
-because they were the same process. 1.45ms per request buys the difference
-between "the model is down" and "the product is down".
+because they were the same process. A millisecond per request buys the
+difference between "the model is down" and "the product is down".
 
 This chapter was written expecting to lose. The build plan asked whether it
 should exist at all, on the theory that a service split is worse on every
