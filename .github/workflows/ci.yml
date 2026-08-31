@@ -6,10 +6,18 @@ name: CI
 # chapter's measurement still runs end to end and its assertions still hold,
 # which is the only promise the ADRs rest on.
 #
-# Two of the chapters assert rather than report, and those are the ones worth
+# Four of the chapters assert rather than report, and those are the ones worth
 # having here: examples/02_repeatability.py exits non-zero if the same workload
-# stops producing identical results, and ch07 refuses to run at all if its
-# edits no longer change any answer.
+# stops producing identical results, ch01's fairness gate refuses to let a line
+# count stand if the builds stopped agreeing, ch07 refuses to run at all if its
+# edits no longer change any answer, and ch04 fails if the tier hop stops being
+# a negligible share of a request.
+#
+# Note what that does not cover. A reported number can still drift inside a
+# passing run, and one did: ch04's hop was published as 1.45ms and was ~1ms a
+# few weeks later with CI green throughout. Hence ch04's assertion, which is on
+# the ratio rather than the milliseconds, because the milliseconds are wall
+# clock and the ratio is the claim. See LESSONS.md.
 
 on:
   push:
@@ -48,6 +56,12 @@ jobs:
       - name: Chapter 1, the variants are the same app
         run: python ch01-provider-seam/fairness.py
 
+      - name: Chapter 4, the hop is a negligible share of a request
+        run: python ch04-model-tier/stress.py
+
+      - name: Chapter 7, the edits are visible to the metric
+        run: python ch07-indexing/stress.py
+
       # Reports. A crash here means a chapter's measurement no longer runs.
       - name: Chapter 1, count the diff
         run: python ch01-provider-seam/measure.py
@@ -55,12 +69,8 @@ jobs:
         run: python examples/00_reference_app.py
       - name: Chapter 2, a second worker
         run: python ch02-state/stress.py
-      - name: Chapter 4, the hop and the blast radius
-        run: python ch04-model-tier/stress.py
       - name: Chapter 5, guarding a stream
         run: python ch05-streaming/stress.py
-      - name: Chapter 7, staleness
-        run: python ch07-indexing/stress.py
       - name: Chapter 8, rollout
         run: python ch08-rollout/stress.py
       - name: Chapter 9, the leak test
