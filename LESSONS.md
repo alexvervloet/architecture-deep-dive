@@ -96,6 +96,10 @@ The hop came out at 1.45ms, and the chapter now prints both the isolated
 figure and the end-to-end difference so the reader can see why the second one
 is not used.
 
+*(That 1.45ms is what this run produced and is not the current figure. The fix
+above was real but I read too much into it: see the 2026-08-31 entry at the end
+of this file, where the same number turns out to still drift.)*
+
 **Next time:** never estimate a small quantity as the difference of two larger
 noisy ones. Instrument the boundary itself. The warning sign was rerunning and
 getting a materially different headline, which is worth treating as a
@@ -124,3 +128,39 @@ seconds instead of hanging.
 plain `mp.Queue` with them, and every blocking `get()` in a measurement
 harness should have a timeout. A hang is the worst failure mode available: it
 produces no evidence and wastes the most time.
+
+## 2026-08-31, ch04: a published wall-clock constant quietly stopped being true
+
+**Expected:** the hop measurement was fixed. An earlier lesson in this file
+records moving the timer inside the app so the number stopped being the
+difference of two noisy totals, and the chapter published 1.45ms on that basis.
+
+**What happened:** a pre-release audit re-ran the chapter and got 0.88ms, then
+0.90, 1.09, 1.06, 1.09. The published figure was roughly 40% high and had been
+for weeks. Nothing failed. CI runs ch04 on every push, but only as a report, so
+a green check meant "the file still executes" and never meant "the number still
+holds". The figure had also been copied into ch10's `MEASURED` table as a
+constant with a source comment, into the textbook, and into two exercises, so
+one stale measurement had quietly become five citations.
+
+Instrumenting the boundary had helped and I over-read it. It cut the spread
+roughly in half; it did not turn a wall-clock measurement into a constant. Five
+trials still range 0.88 to 1.16ms, and the number moves with whatever else the
+machine is doing.
+
+**Fix:** the chapter now runs five trials and publishes a median with the
+range. The stressor asserts on the ratio (the hop as a share of a realistic
+request, ceiling 2%) rather than on the milliseconds, because the ratio is what
+the ADR's argument actually rests on and it survives a change of machine. The
+docs quote "about 1ms" and the ADR's limits section says plainly that the
+earlier figure no longer reproduces. `MEASURED["model_tier_hop_ms"]` carries a
+comment saying it is the one wall-clock entry in that table.
+
+**Next time:** two things. A number that comes off a real clock is a
+distribution, and publishing it as a point is a claim about precision you have
+not earned, so quote the range from the start. And an assertion belongs on the
+part of a claim that transfers: asserting "the hop is 1.45ms" would have been
+flaky on any other machine, while asserting "the hop is under 2% of a request"
+would have caught a real regression and never fired on noise. The general
+version: when CI runs an experiment without asserting anything, it is testing
+the interpreter, not the finding.
