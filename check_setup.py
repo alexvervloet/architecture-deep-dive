@@ -17,12 +17,15 @@ OK, BAD = "ok  ", "FAIL"
 def main() -> int:
     problems = []
 
+    # 3.11 rather than 3.10 because that is the floor CI actually exercises.
+    # Nothing here uses 3.11-only syntax, so 3.10 will probably work; "probably"
+    # is not what this file is for.
     version = sys.version_info
-    if version >= (3, 10):
+    if version >= (3, 11):
         print(f"{OK} python {version.major}.{version.minor}.{version.micro}")
     else:
-        print(f"{BAD} python {version.major}.{version.minor}: this repo needs 3.10+")
-        problems.append("upgrade python to 3.10 or newer")
+        print(f"{BAD} python {version.major}.{version.minor}: this repo needs 3.11+")
+        problems.append("upgrade python to 3.11 or newer")
 
     try:
         import dotenv  # noqa: F401
