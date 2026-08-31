@@ -29,10 +29,10 @@ Every constant used comes from an earlier chapter and carries its source in
 | ch08 rollout | gate + canary | gate + shadow | gate + canary |
 | ch09 tenancy | filter in retrieval | none | filter in retrieval |
 
-Six differ, three do not. The three that agree are the ones to stop arguing
+Seven differ, two do not. The two that agree are the ones to stop arguing
 about: the seam and the model tier were right for an overnight batch job and a
-real-time voice agent alike, because 1 line and 1.45ms are below what any
-budget here can notice.
+real-time voice agent alike, because 1 line and about a millisecond are below
+what any budget here can notice.
 
 The voice agent is the interesting column. It takes **in-process state**, which
 ch02 spent a chapter arguing against, because a call is one connection pinned to
@@ -59,7 +59,7 @@ removed rather than sourced.
 
 ## The finding that surprised me
 
-**The architecture is nearly invisible in the latency budget.** Six of nine
+**The architecture is nearly invisible in the latency budget.** Seven of nine
 decisions differ across these products and their mean latencies land within
 36ms of each other, because the model call is **98%** of every request.
 

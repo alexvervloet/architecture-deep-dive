@@ -27,7 +27,7 @@ the budget can only tell you about the mean.
 
 ## Consequences, measured
 
-**Six of nine decisions differ across the three products; three do not.**
+**Seven of nine decisions differ across the three products; two do not.**
 
 | chapter | support chat | batch pipeline | voice agent |
 |---|---|---|---|
@@ -41,10 +41,10 @@ the budget can only tell you about the mean.
 | ch08 rollout | gate + canary | gate + shadow | gate + canary |
 | ch09 tenancy | filter in retrieval | none | filter in retrieval |
 
-The three that agree are the useful ones to stop arguing about. The provider
+The two that agree are the useful ones to stop arguing about. The provider
 seam and the model tier were right for an overnight batch job and a real-time
-voice agent alike, because their measured costs (1 line, 1.45ms) are below
-anything either budget can notice.
+voice agent alike, because their measured costs (1 line, about a millisecond)
+are below anything either budget can notice.
 
 The voice agent is where the nine decisions collide most usefully. It takes
 in-process state, which ch02 spent a whole chapter arguing against, because a
@@ -86,7 +86,7 @@ measured-constants table as though a chapter had produced it. None had. It was
 removed rather than sourced, and the empty column is the honest result.
 
 **The architecture is nearly invisible in the latency budget.** The three
-products differ on six of nine decisions and their mean latencies are within
+products differ on seven of nine decisions and their mean latencies are within
 36ms of each other, because the model call is **98%** of every request. Eight
 of the nine decisions moved the budget by an amount no user could perceive.
 

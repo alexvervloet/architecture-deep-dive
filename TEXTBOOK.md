@@ -26,7 +26,7 @@ What is left is the set of decisions that are different *because there is a mode
 
 **You cannot unsend a token.** Streaming moves your safety checks to a place where they have less to work with, and chapter 5 measures exactly how much less: an output guard watching the accumulated text detects every violation and prevents none of them, because a pattern only becomes recognisable once it is complete, and completing it is what the last delivered token did.
 
-**The thing you are scaling is weights on a GPU.** It fails by being OOM-killed rather than by raising an exception you can catch, which inverts the usual advice about splitting services. Chapter 4 kills a model with `os._exit` and finds that an in-process design loses its health checks and its cached responses along with the model, while a tiered one keeps both for 1.45ms a request.
+**The thing you are scaling is weights on a GPU.** It fails by being OOM-killed rather than by raising an exception you can catch, which inverts the usual advice about splitting services. Chapter 4 kills a model with `os._exit` and finds that an in-process design loses its health checks and its cached responses along with the model, while a tiered one keeps both for about a millisecond a request.
 
 ## 21.3 The discipline: measure the consequence, not the mechanism
 
@@ -70,7 +70,7 @@ Two things come out, and the second is the one to remember.
 
 The budget predicts the mean and cannot predict the tail. Every constant these chapters produced is a mean, so no amount of adding them yields a tail, and the empty column in that table is the honest result rather than a gap to be filled. Support chat's mean is 1198ms and its slowest request in the same run took 4995ms, with nothing broken. The only way to get that number is to build the thing and run it. (An earlier draft of that file carried a fabricated p95 constant sitting among the measured ones as though a chapter had produced it. It had not. Removing it was more useful than sourcing it.)
 
-And then the finding that reframes the whole dive: **the architecture is nearly invisible in a latency budget.** Six of nine decisions come out differently across those three products, and their mean latencies land within 36ms of each other, because the model call is 98% of every request. Eight of the nine decisions moved the budget by an amount no user could perceive.
+And then the finding that reframes the whole dive: **the architecture is nearly invisible in a latency budget.** Seven of nine decisions come out differently across those three products, and their mean latencies land within 36ms of each other, because the model call is 98% of every request. Eight of the nine decisions moved the budget by an amount no user could perceive.
 
 That is not an argument that the decisions do not matter. It is an argument about which column to defend them in. Chapter 2 was worth 38 points of correctness. Chapter 4 was worth ten out of ten health checks surviving an outage. Chapter 9 was worth a leaked contract. Chapter 6 was worth 2.9x wall clock under a slow dependency. None of those appear in a latency budget, and a design review that only budgets latency would have rejected all four.
 
