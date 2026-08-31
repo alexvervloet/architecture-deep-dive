@@ -61,14 +61,16 @@ is the useful outcome.
 1. **Predict the hop, then measure it two ways.** Guess the localhost HTTP cost
    in milliseconds. Then compute it by differencing end-to-end medians, and by
    the isolated timer the chapter uses. The first swings between 0.9 and 2.7ms
-   across runs; the second lands on 1.45. Why does the naive estimator fail?
+   across runs; the second sits near 1.0 with a range of about 0.3ms across
+   five trials. Why does the naive estimator fail, and why does instrumenting
+   the boundary narrow the spread without closing it?
 2. **Make the crash catchable.** Change `/crash` in `model_server.py` from
    `os._exit(1)` to `raise RuntimeError(...)`. Re-run. The blast-radius table
    collapses, because a catchable exception is not the failure this chapter is
    about. Which real failures are `os._exit` and which are the exception?
 3. **Price the hop against a fast model.** Set the profile to `instant` and
-   compute the hop as a percentage of the request. Then `slow`. The same 1.45ms
-   is 0.13% or 5%, and that ratio is the entire decision.
+   compute the hop as a percentage of the request. Then `slow`. The same ~1ms
+   is 0.09% or 3%, and that ratio is the entire decision.
 
 ## Chapter 5: streaming and guardrails
 
