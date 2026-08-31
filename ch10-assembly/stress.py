@@ -156,8 +156,8 @@ def main() -> int:
         f"\n  The {len(chapters) - varied} that did not are the ones worth not re-litigating:"
         f" the provider seam and"
         f"\n  the model tier were the right answer for a voice agent and an overnight batch"
-        f"\n  job alike, because their measured costs (1 line, 1.45ms) are too small for any"
-        f"\n  budget here to notice."
+        f"\n  job alike, because their measured costs (1 line, about a millisecond) are"
+        f"\n  too small for any budget here to notice."
     )
 
     print("\n" + "=" * 92)
@@ -225,7 +225,7 @@ def main() -> int:
         f"\n  tail does. The only way to get that number was to build the thing and run it."
         f"\n"
         f"\n  The other half of this table is quieter and matters more. The three products"
-        f"\n  differ on six of nine decisions and their latencies are within"
+        f"\n  differ on {varied} of {len(chapters)} decisions and their latencies are within"
         f" {batch['mean_total_ms'] - chat['mean_total_ms']:.0f}ms of each"
         f"\n  other, because the model call is"
         f" {(chat['mean_total_ms'] - runs['support chat'][2]['fixed_ms']) / chat['mean_total_ms'] * 100:.0f}%"
