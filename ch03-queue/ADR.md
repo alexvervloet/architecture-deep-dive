@@ -106,9 +106,9 @@ paid in a different currency than the columns above.
   interleaving is not, so this chapter was written expecting the counts to
   wobble. Two runs produced identical answered/abandoned/rejected counts,
   identical spend, identical waste, and identical connection-seconds, with
-  p50/p95 differing by 1 to 6ms. That is a property of this workload (one
-  burst, fixed capacity, deterministic service times), not a guarantee, and
-  the millisecond columns are still wall clock.
+  p50/p95 differing by a few milliseconds to a few tens. That is a property of
+  this workload (one burst, fixed capacity, deterministic service times), not a
+  guarantee, and the millisecond columns are still wall clock.
 - **Threads, not processes or async.** Fine here because the simulated latency
   is `time.sleep`, which releases the GIL. It would be wrong for CPU-bound
   work.

@@ -71,7 +71,7 @@ this pattern is at its best.
 |---|---|---|---|---|
 | hard fail | 0/24 | 24 | 2031ms | 6.1s |
 | tiered | 24/24 | 0 | 2033ms | 6.1s |
-| tiered + breaker | 24/24 | 0 | **2029ms** | **4.1s** |
+| tiered + breaker | 24/24 | 0 | 2029ms | **4.1s** |
 
 **Sustained, 48 requests:**
 
@@ -82,7 +82,9 @@ this pattern is at its best.
 | tiered + breaker | 48/48 | 2033ms | **4.2s** |
 
 **The breaker is a capacity device and it pays off more slowly than its
-reputation suggests.** Over 24 requests it saved a third of the wall clock;
+reputation suggests.** (The p95 column is wall clock and the three designs sit
+within a few milliseconds of each other there, which reruns reshuffle. Read it
+as "no difference", not as a ranking.) Over 24 requests it saved a third of the wall clock;
 over 48 it saved 2.9x, because a longer fault gives it more requests to
 protect after it trips. It never moved p95 at all, in either run: the requests
 that hit an open breaker were already fast, and the ones that tripped it had
