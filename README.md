@@ -114,8 +114,11 @@ so, and show the spread.
 
 No chapter is done until its ADR cites a run that actually happened, per the series'
 [authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
-CI runs every one of these experiments on push, so the numbers in the ADRs are checked
-rather than remembered.
+CI runs every one of these experiments on push, so a chapter whose measurement stops
+running fails the build. Be clear about what that does and does not buy: four of them
+assert (determinism, the ch01 fairness gate, ch07's edit-visibility check, ch04's ratio
+ceiling) and the rest only have to finish. A number can drift inside a passing run, and
+one did: see the ch04 entry in [LESSONS.md](LESSONS.md).
 
 Then: [EXERCISES.md](EXERCISES.md), predict-then-run for every chapter, several of which
 reproduce this repo's own mistakes on purpose · [TEXTBOOK.md](TEXTBOOK.md), the lecture
