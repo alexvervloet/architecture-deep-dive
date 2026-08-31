@@ -453,6 +453,7 @@ def generate(
         resp = _anthropic_client().messages.create(
             model=_CLAUDE_CHAT,
             max_tokens=max_tokens,
+            timeout=timeout_ms / 1000.0 if timeout_ms else None,
             system=system,
             messages=[{"role": "user", "content": user}],
         )
