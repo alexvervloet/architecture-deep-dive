@@ -70,7 +70,7 @@ is the useful outcome.
    about. Which real failures are `os._exit` and which are the exception?
 3. **Price the hop against a fast model.** Set the profile to `instant` and
    compute the hop as a percentage of the request. Then `slow`. The same ~1ms
-   is 0.09% or 3%, and that ratio is the entire decision.
+   is 0.09% or about 4%, and that ratio is the entire decision.
 
 ## Chapter 5: streaming and guardrails
 
