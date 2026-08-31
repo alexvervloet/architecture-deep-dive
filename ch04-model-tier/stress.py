@@ -44,6 +44,15 @@ APP_PORT = 8800
 MODEL_PORT = 8801
 QUESTIONS = service.QUESTIONS
 
+# The hop is the one figure here that comes off a real clock, so it is measured
+# as a distribution rather than a point. Five trials is enough to show the
+# spread without adding a minute to the run.
+HOP_TRIALS = 5
+
+# The ratio the chapter's argument rests on, with room for a contended CI box.
+# Measured values sit near 0.1%, so this trips on a real regression, not noise.
+HOP_SHARE_CEILING_PCT = 2.0
+
 
 def wait_until_up(port: int, path: str = "/health", timeout: float = 15.0) -> bool:
     deadline = time.time() + timeout
@@ -176,20 +185,38 @@ def main() -> int:
     print("1. WHAT THE HOP COSTS")
     print("=" * 78)
 
-    instant = measure_hop("instant")
-    hop_ms = instant["tiered"]["median_model_ms"] - instant["inprocess"]["median_model_ms"]
-    print("\n  Against an instant model, timing the model call itself:\n")
-    print(f"    {'design':<12} {'model call ms':>14} {'whole request ms':>18}")
-    for mode in ("inprocess", "tiered"):
-        r = instant[mode]
-        print(f"    {mode:<12} {r['median_model_ms']:>14.2f} {r['median_ms']:>18.2f}")
+    trials = [measure_hop("instant") for _ in range(HOP_TRIALS)]
+    hops = sorted(
+        t["tiered"]["median_model_ms"] - t["inprocess"]["median_model_ms"] for t in trials
+    )
+    hop_ms = statistics.median(hops)
+    instant = trials[len(trials) // 2]
+
     print(
-        f"\n    The hop costs {hop_ms:.2f}ms, measured around the call alone."
-        f"\n    Note the right-hand column: differencing whole-request medians gives"
-        f"\n    {instant['tiered']['median_ms'] - instant['inprocess']['median_ms']:+.2f}ms,"
-        f" because this app's retrieval jitter is several times"
-        f"\n    larger than the boundary. That estimator swung between 0.9 and 2.7ms"
-        f"\n    across runs before the measurement was moved inside the app."
+        f"\n  Against an instant model, timing the model call itself."
+        f"\n  {HOP_TRIALS} independent trials, because this is wall clock and it moves:\n"
+    )
+    print(f"    {'trial':<12} {'in-process ms':>14} {'tiered ms':>12} {'hop ms':>9}")
+    for i, t in enumerate(trials, 1):
+        print(
+            f"    {i:<12} {t['inprocess']['median_model_ms']:>14.2f}"
+            f" {t['tiered']['median_model_ms']:>12.2f}"
+            f" {t['tiered']['median_model_ms'] - t['inprocess']['median_model_ms']:>9.2f}"
+        )
+    print(
+        f"\n    The hop costs {hop_ms:.2f}ms, median of {HOP_TRIALS} trials,"
+        f" range {hops[0]:.2f} to {hops[-1]:.2f}ms."
+        f"\n    That range is the point. This is the only number in the repo taken"
+        f"\n    from a real clock rather than a simulated one, so it moves with the"
+        f"\n    machine, and a single figure quoted to two decimals would be a lie"
+        f"\n    about its precision. Quote the range, or re-run it on your own box."
+        f"\n"
+        f"\n    Differencing whole-request medians instead gives"
+        f" {instant['tiered']['median_ms'] - instant['inprocess']['median_ms']:+.2f}ms"
+        f" on this trial,"
+        f"\n    because the app's retrieval jitter is several times larger than the"
+        f"\n    boundary. That estimator swung between 0.9 and 2.7ms across runs,"
+        f"\n    which is why the measurement was moved inside the app."
     )
 
     # Fewer samples here purely for runtime: 40 sequential 1.3s requests per
@@ -208,6 +235,25 @@ def main() -> int:
         f"\n    The same {hop_ms:.2f}ms hop is now {share:.2f}% of a"
         f" {slow['tiered']['median_ms']:.0f}ms request."
     )
+
+    # The assertion is on the ratio, not the milliseconds. The absolute hop is
+    # wall clock and drifts with the machine (it is why this pass runs trials
+    # at all); the share of a realistic request is the claim the ADR actually
+    # rests on, and it holds by two orders of magnitude on any machine that can
+    # run this at all. An earlier version of this chapter published 1.45ms as a
+    # settled constant and nothing noticed when it drifted 40%, because CI ran
+    # the file and only checked that it did not crash. See LESSONS.md.
+    if not hop_ms > 0:
+        sys.exit(
+            f"FAIL: the hop measured {hop_ms:.2f}ms, which is not positive. A service"
+            f" split is always slower; if it is not, this measurement is broken."
+        )
+    if share >= HOP_SHARE_CEILING_PCT:
+        sys.exit(
+            f"FAIL: the hop is {share:.2f}% of a realistic request, at or above the"
+            f" {HOP_SHARE_CEILING_PCT}% ceiling this chapter's argument depends on."
+            f" Either the machine is badly contended or the boundary got expensive."
+        )
 
     print("\n" + "=" * 78)
     print("2. WHAT THE HOP BUYS: BLAST RADIUS")
