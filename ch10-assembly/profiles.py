@@ -28,8 +28,14 @@ from dataclasses import dataclass
 # ---------------------------------------------------------------------------
 
 MEASURED = {
-    # ch04: in-process 1.31ms vs tiered 2.75ms, timed around the model call.
-    "model_tier_hop_ms": 1.45,
+    # ch04: in-process 1.33ms vs tiered 2.31ms, timed around the model call.
+    # The one wall-clock constant in this table, so it is a median of five
+    # trials (range 0.88 to 1.16ms) rather than a point, and it is the only
+    # entry here that will differ on your machine. It contributes about a
+    # millisecond to a ~1300ms budget, so nothing below turns on its exact
+    # value; an earlier version of this file carried 1.45ms long after that
+    # stopped reproducing and no total moved enough to notice. See LESSONS.md.
+    "model_tier_hop_ms": 0.99,
     # ch02: sqlite 0.47ms per turn against an in-process dict's 0.008ms.
     "shared_store_ms": 0.47,
     "in_process_store_ms": 0.008,
@@ -172,13 +178,13 @@ def decide(product: Product) -> list[Decision]:
         )
     decisions.append(Decision("ch03", "request shape", choice, why))
 
-    # ch04: 1.45ms, 0.13% of a realistic request, buys 10/10 health checks
+    # ch04: ~1ms, 0.09% of a realistic request, buys 10/10 health checks
     # during a model outage.
     decisions.append(Decision(
         "ch04", "model tier",
         "separate tier",
-        "1.45ms measured, and ch04's in-process build scored 0/10 on health "
-        "checks when the model died",
+        "about a millisecond measured, and ch04's in-process build scored 0/10 "
+        "on health checks when the model died",
     ))
 
     # ch05: window(8) contained everything at 200ms TTFT against buffering's
