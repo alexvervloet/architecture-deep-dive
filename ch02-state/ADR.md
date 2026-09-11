@@ -9,9 +9,9 @@ processes, no key required.
 
 The reference app keeps conversation history in a module-level dict. So does
 most of the LLM sample code on the internet, and so does almost every
-prototype, because at one process it is correct, free, and obvious.
+prototype, because at one process it's correct, free, and obvious.
 
-The question is what that costs once there is more than one process, and
+The question is what that costs once there's more than one process, and
 whether the standard cheap fix (route each session to the same worker) is
 enough.
 
@@ -23,7 +23,7 @@ Three designs, same app, same requests:
 | memory + sticky | module-level dict | route by session id |
 | sqlite + spread | shared file | session-unaware |
 
-The workload is 24 two-turn conversations where the second turn cannot be
+The workload is 24 two-turn conversations where the second turn can't be
 answered without the first. "How long is that link valid?" follows either
 "How do I reset my password?" (30 minutes) or "How do I export my data?"
 (seven days). The follow-up sentence is identical in both; only the
@@ -87,8 +87,8 @@ trap: the damage is real, small, and easy to attribute to something else. It
 also recurs on every single deploy, and it grows with restart frequency, which
 is the opposite of the direction a maturing service moves.
 
-**The shared store cost 0.47ms per turn.** Against the dict's 0.008ms that is
-roughly 50x, and it is the right way to lose that argument: 0.47ms against a
+**The shared store cost 0.47ms per turn.** Against the dict's 0.008ms that's
+roughly 50x, and it's the right way to lose that argument: 0.47ms against a
 realistic model call of ~900ms is under 0.1% of the request. The correctness
 column is worth more than 0.47ms.
 
@@ -100,9 +100,9 @@ column is worth more than 0.47ms.
   compiled regex cache, a warm client. Those belong in the process. The test
   is whether a second request needs to see it.
 - **Latency budgets in the single-digit milliseconds.** Not an LLM app. If the
-  model call is 900ms, the store is noise; if there is no model call, this
+  model call is 900ms, the store is noise; if there's no model call, this
   arithmetic changes completely.
-- **A store that is not actually shared.** SQLite on a local disk across
+- **A store that isn't actually shared.** SQLite on a local disk across
   several machines is the dict again with extra steps and more confidence.
 
 ## Limits of this measurement
@@ -111,8 +111,8 @@ column is worth more than 0.47ms.
   no network. 0.47ms is a floor. Postgres or Redis across a network is more
   like 1 to 5ms, still small against a model call, but not 0.47.
 - **Routing is modelled, not real.** `spread` is a deterministic pseudo-random
-  pick, which is not what least-connections does, but it shares the property
-  that matters: it is not session-aware, so a follow-up lands on the right
+  pick, which isn't what least-connections does, but it shares the property
+  that matters: it isn't session-aware, so a follow-up lands on the right
   worker with probability 1/workers. The measured 29% at four workers matches
   the predicted 25% within the noise of 24 samples.
 - **Two-turn conversations.** Longer conversations make the dict worse, not
