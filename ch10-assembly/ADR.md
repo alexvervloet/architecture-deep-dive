@@ -27,7 +27,7 @@ the budget can only tell you about the mean.
 
 ## Consequences, measured
 
-**Seven of nine decisions differ across the three products; two do not.**
+**Seven of nine decisions differ across the three products; two don't.**
 
 | chapter | support chat | batch pipeline | voice agent |
 |---|---|---|---|
@@ -49,7 +49,7 @@ are below anything either budget can notice.
 The voice agent is where the nine decisions collide most usefully. It takes
 in-process state, which ch02 spent a whole chapter arguing against, because a
 call is one connection pinned to one worker for its life, so ch02's failure
-mode cannot occur. And ch05's 8-token guard window costs 200ms of its 300ms
+mode can't occur. And ch05's 8-token guard window costs 200ms of its 300ms
 budget, which the chapter flags rather than waves through.
 
 **The composition arithmetic holds for the mean:**
@@ -61,12 +61,12 @@ budget, which the chapter flags rather than waves through.
 | voice agent | 300ms | 221ms | 221ms | +0.0ms |
 
 The two windowed products predict exactly, because their first token is fixed
-overhead plus a constant hold. The batch prediction is 124ms out, 9%, and it is
+overhead plus a constant hold. The batch prediction is 124ms out, 9%, and it's
 the only one whose prediction includes a *distribution* mean rather than a
-fixed cost. That is the pattern in miniature: constants compose, distributions
-do not.
+fixed cost. That's the pattern in miniature: constants compose, distributions
+don't.
 
-**The budget cannot predict the tail, and there is nothing honest to put in
+**The budget can't predict the tail, and there's nothing honest to put in
 that column:**
 
 | product | predicted mean | measured mean | predicted p95 | measured p95 | measured max |
@@ -77,7 +77,7 @@ that column:**
 
 Every constant these nine chapters produced is a mean. No amount of adding
 means yields a tail. Support chat's mean is 1198ms and its slowest request in
-the same run took 4995ms, **4.2x**, with nothing broken: that is a 5% tail at
+the same run took 4995ms, **4.2x**, with nothing broken: that's a 5% tail at
 +4s doing what a 5% tail does. The only way to get that number was to build the
 assembled system and run it.
 
@@ -90,7 +90,7 @@ products differ on seven of nine decisions and their mean latencies are within
 36ms of each other, because the model call is **98%** of every request. Eight
 of the nine decisions moved the budget by an amount no user could perceive.
 
-That is not an argument that the decisions do not matter. It is an argument
+That isn't an argument that the decisions don't matter. It's an argument
 about which column to defend them in:
 
 - ch02 was worth **38 points of correctness** (62% to 100% at four workers).
@@ -105,22 +105,22 @@ latency would have rejected all four.
 
 - **A much faster model.** At 98% of the request, the model is the budget. A
   200ms model inverts this entirely and the fixed overheads start to matter.
-- **A product with a hard tail SLO.** Then the mean-based budget is not just
-  incomplete, it is the wrong instrument, and the tail has to be measured per
+- **A product with a hard tail SLO.** Then the mean-based budget isn't just
+  incomplete, it's the wrong instrument, and the tail has to be measured per
   component before anything is composed.
 - **More than one model call per request.** Agent loops multiply the dominant
   term and change every ratio here.
 
 ## Limits of this measurement
 
-- **The prediction is not independently validated.** The same simulated
-  latencies drive both the budget and the run, so a component's cost cannot
-  disagree with itself. What is under test is the composition, and the tail
+- **The prediction isn't independently validated.** The same simulated
+  latencies drive both the budget and the run, so a component's cost can't
+  disagree with itself. What's under test is the composition, and the tail
   behaviour, which are the parts that could have gone wrong and did.
 - **The decision function is mine.** `decide()` encodes how I read the nine
   ADRs onto three product profiles. Another engineer could read ch02
   differently for the voice agent and be defensible. The ADRs are measurements;
-  the mapping is judgement, and it is in code so it can be argued with.
+  the mapping is judgement, and it's in code so it can be argued with.
 - **Three products, chosen to be far apart.** Products that differ less would
   produce fewer than six differences, which would be a less interesting table
   and an equally true one.
