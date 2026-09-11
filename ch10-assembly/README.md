@@ -29,18 +29,18 @@ Every constant used comes from an earlier chapter and carries its source in
 | ch08 rollout | gate + canary | gate + shadow | gate + canary |
 | ch09 tenancy | filter in retrieval | none | filter in retrieval |
 
-Seven differ, two do not. The two that agree are the ones to stop arguing
+Seven differ, two don't. The two that agree are the ones to stop arguing
 about: the seam and the model tier were right for an overnight batch job and a
 real-time voice agent alike, because 1 line and about a millisecond are below
 what any budget here can notice.
 
 The voice agent is the interesting column. It takes **in-process state**, which
 ch02 spent a chapter arguing against, because a call is one connection pinned to
-one worker for its whole life so ch02's failure cannot occur. And ch05's guard
+one worker for its whole life so ch02's failure can't occur. And ch05's guard
 window costs 200ms of its 300ms budget, which the derivation flags rather than
 waves through.
 
-## The budget holds for the mean, and cannot see the tail
+## The budget holds for the mean, and can't see the tail
 
 | product | predicted mean | measured mean | predicted p95 | measured p95 | measured max |
 |---|---|---|---|---|---|
@@ -63,7 +63,7 @@ removed rather than sourced.
 decisions differ across these products and their mean latencies land within
 36ms of each other, because the model call is **98%** of every request.
 
-That is not an argument that the decisions do not matter. It is an argument
+That isn't an argument that the decisions don't matter. It's an argument
 about which column to defend them in:
 
 - ch02 was worth **38 points of correctness**
