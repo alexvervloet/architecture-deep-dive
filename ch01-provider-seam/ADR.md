@@ -11,10 +11,10 @@ An app calls a model from more than one place. The question is whether those
 calls go straight to the SDK at each call site, or through one function that
 every call site shares.
 
-The usual argument for the seam is portability, and it is usually made without
+The usual argument for the seam is portability, and it's usually made without
 numbers. This chapter builds the same four-feature app both ways, applies five
 requirements to both, and counts the churn. Both variants are held to
-byte-identical output by `fairness.py`, so a smaller diff cannot be bought by
+byte-identical output by `fairness.py`, so a smaller diff can't be bought by
 doing less.
 
 The five requirements, chosen because each one is a real thing that happens to
@@ -47,7 +47,7 @@ first time a call site needs a fundamentally different interaction shape.
 **The seam's upfront cost was 1 line.** 40 significant lines against 39, at
 v0, before any requirement. `provider.py` adds almost exactly what `app.py`
 stops carrying. The "abstraction tax" that this decision is usually argued
-about, at this scale, is a rounding error. There is no break-even point to
+about, at this scale, is a rounding error. There's no break-even point to
 find in the table below because there was nothing to pay back.
 
 **Churn per requirement, significant lines (comments and docstrings excluded):**
@@ -63,14 +63,14 @@ find in the table below because there was nothing to pay back.
 
 The seam changed 49% as many lines across the five requirements. For the first
 three, `app.py` was never opened at all, which is a stronger claim than a small
-diff: those changes could not have broken a feature, because no feature's code
+diff: those changes couldn't have broken a feature, because no feature's code
 was in the blast radius.
 
-**Requirement 2 is the real gap, and it is a gap about drift, not typing.**
+**Requirement 2 is the real gap, and it's a gap about drift, not typing.**
 78 lines against 30, because the retry loop is identical at three call sites.
 The line count understates it: three copies of a retry policy drift, and the
 drift is silent until the one call site somebody forgot to update is the one
-taking traffic. The seam cannot have that bug. Note also what the inline
+taking traffic. The seam can't have that bug. Note also what the inline
 variant's honest v2 looks like: a reader's instinct is to extract a helper,
 and acting on that instinct *is* building the seam, late and under deadline.
 
@@ -78,14 +78,14 @@ and acting on that instinct *is* building the seam, late and under deadline.
 earlier requirements added has to be re-typed by hand at a new inline call
 site (retry loop, timeout, exception tuple, cost line), and omitting any of
 them is a silent bug rather than an error. The seam's new feature was retried,
-timed out, and cost-accounted because it could not not be.
+timed out, and cost-accounted because it couldn't not be.
 
 **Requirement 5 refuted the prediction.** Streaming was expected to cost the
-seam more, because a streamed call cannot be expressed as the seam's single
+seam more, because a streamed call can't be expressed as the seam's single
 buffered return type and forces a second method. The seam still changed fewer
 lines: 32 against 40. The prediction was wrong; the number stands.
 
-What the line count missed is that the cost landed somewhere it cannot see:
+What the line count missed is that the cost landed somewhere it can't see:
 
 - The seam's interface doubled. Every future provider must now implement two
   methods, and streaming shapes differ far more between vendors than buffered
@@ -94,7 +94,7 @@ What the line count missed is that the cost landed somewhere it cannot see:
   method; it would cost more against two.
 - The v3 guarantee weakened. "An uncounted model call is unreachable" became
   "unreachable, unless it streams".
-- Retry silently does not apply to the streaming path, in *both* variants,
+- Retry silently doesn't apply to the streaming path, in *both* variants,
   because retrying mid-stream means retracting tokens the caller already has.
   Neither design admits this in its signature.
 
@@ -127,14 +127,14 @@ through the change.
 - **One app, four call sites, five requirements, chosen by the author.** A
   different requirement set gives different numbers. The requirement most
   favourable to inline was included deliberately, and the seam still won it on
-  lines, which is some evidence the slate was not stacked.
+  lines, which is some evidence the slate wasn't stacked.
 - **Churn counts a modified line as two** (one removed, one added). It inflates
   both variants equally, so the ratio holds; the absolute numbers are churn,
   not new code.
 - **The seam here is minimal.** A real one grows config, provider registries,
   fallbacks, and its own tests, none of which are in the 1-line upfront cost.
   Read that number as the floor, not the typical case.
-- **Line count is a proxy for cost, and a poor one.** It is used because it is
+- **Line count is a proxy for cost, and a poor one.** It's used because it's
   measurable and hard to fudge under the fairness gate. The three most
   important consequences in requirement 5 are invisible to it, and this ADR
-  argues them in prose because that is the honest place to argue them.
+  argues them in prose because that's the honest place to argue them.
