@@ -23,20 +23,20 @@ Byte-identical across runs.
 | filter in retrieval | 0 | 15/16 | 14.0 | 1 |
 | index per tenant | 0 | 15/16 | 14.0 | 2 |
 
-**The leak is exactly what you would fear.** Globex asked how long a password
+**The leak is exactly what you'd fear.** Globex asked how long a password
 reset link stays valid and got back: *"Acme has a negotiated exception: their
 password reset links expire after 24 hours rather than 30 minutes, because
 their helpdesk batches requests overnight."* The citation list shown to the
-user was clean. The answer was not.
+user was clean. The answer wasn't.
 
-Filtering after the model is the design that ships, because it is the only one
+Filtering after the model is the design that ships, because it's the only one
 that asks nothing of the retrieval layer. A permission check that runs after the
-model has read the document is not a permission check.
+model has read the document isn't a permission check.
 
 ## The prediction that needed a condition
 
 The three safe designs tied at 15/16. This chapter predicted that filtering
-*after* retrieval would lose recall, and at two tenants with top-3 it did not.
+*after* retrieval would lose recall, and at two tenants with top-3 it didn't.
 So the claim was measured against what it depends on:
 
 | tenants | leaks | k=1 after | k=1 inside | k=3 after | k=3 inside |
