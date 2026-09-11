@@ -29,13 +29,13 @@ model profile (~1.3s mean, 5% tail at +4s):
 
 ## Decision
 
-Queue anything a human is not actively waiting on, and shed load rather than
-enqueueing unboundedly for anything they are. Do not hold connections through
+Queue anything a human isn't actively waiting on, and shed load rather than
+enqueueing unboundedly for anything they are. Don't hold connections through
 model calls.
 
 ## Consequences, measured
 
-**Below capacity, there is no argument.** Four concurrent requests against
+**Below capacity, there's no argument.** Four concurrent requests against
 eight workers: every design answers everything, p50 ~1.2s. Sync wins on
 simplicity. Any chapter that skipped this scenario would be selling something.
 
@@ -48,11 +48,11 @@ against 8 workers, 3s deadline:
 | queue | 15/32 | 3040ms | 3048ms | $0.00202 | $0.00000 | 0.3 | **32/32** |
 | shed | 15/32 | **1254ms** | **2479ms** | **$0.00104** | $0.00007 | 27.6 | 15/32 |
 
-This is the finding, and it is not the one the chapter title suggests.
-**Queueing did not help anyone get an answer faster or in greater numbers.**
+This is the finding, and it isn't the one the chapter title suggests.
+**Queueing didn't help anyone get an answer faster or in greater numbers.**
 Throughput is set by capacity and service time, not by the shape of the
-front door. What the shape decides is what happens to the 17 requests that did
-not make it:
+front door. What the shape decides is what happens to the 17 requests that didn't
+make it:
 
 - **sync destroys them.** $0.00106 of completed work finished after its client
   had gone, and nothing anywhere holds the results. Those 17 people get
@@ -82,7 +82,7 @@ competes for the same workers as the live requests.
 
 **What the queue costs is the client protocol.** Not latency, not money.
 Someone has to write the polling or the websocket or the webhook, and "not
-ready yet" becomes a state the UI must handle. That is a real cost and it is
+ready yet" becomes a state the UI must handle. That's a real cost and it's
 paid in a different currency than the columns above.
 
 ## What would flip this decision
@@ -91,22 +91,22 @@ paid in a different currency than the columns above.
   something. The below-capacity table is the evidence for the other side.
 - **A human waiting on a chat response.** Streaming a sync response is often
   better UX than a job id, because first-token latency is what the user
-  perceives. That is chapter 5, and it interacts with this decision.
+  perceives. That's chapter 5, and it interacts with this decision.
 - **Sub-second model calls.** If the call is 200ms, connection-seconds stop
   mattering and this whole analysis is noise.
-- **Work that cannot be made idempotent.** A queue implies retries, and
+- **Work that can't be made idempotent.** A queue implies retries, and
   retries imply duplicate side effects. The reference app's `open_ticket`
-  takes an idempotency key for exactly this reason; work that cannot is a
+  takes an idempotency key for exactly this reason; work that can't is a
   reason to be careful, not a reason to hold the connection.
 
 ## Limits of this measurement
 
 - **Queueing delay is emergent, and turned out to be steadier than expected.**
   Service times are derived per request and exactly reproducible; thread
-  interleaving is not, so this chapter was written expecting the counts to
+  interleaving isn't, so this chapter was written expecting the counts to
   wobble. Two runs produced identical answered/abandoned/rejected counts,
   identical spend, identical waste, and identical connection-seconds, with
-  p50/p95 differing by a few milliseconds to a few tens. That is a property of
+  p50/p95 differing by a few milliseconds to a few tens. That's a property of
   this workload (one burst, fixed capacity, deterministic service times), not a
   guarantee, and the millisecond columns are still wall clock.
 - **Threads, not processes or async.** Fine here because the simulated latency
