@@ -23,7 +23,7 @@ overload case would be advertising.
 | **queue** | accept, return a job id, client polls for the result |
 | **shed** | hold the connection, but refuse immediately when the queue is deep |
 
-Shedding is here because it is a real answer that real teams ship, and leaving
+Shedding is here because it's a real answer that real teams ship, and leaving
 it out would have made this a two-way fight with a predetermined winner.
 
 ## The result
@@ -57,7 +57,7 @@ $0.00202.
 **Connections are what actually run out.** 75.6 connection-seconds against 0.3,
 a factor of 224.
 
-What the queue costs is not latency or money, it is the client protocol:
+What the queue costs isn't latency or money, it's the client protocol:
 someone has to write the polling, and "not ready yet" becomes a state the UI
 must handle.
 
