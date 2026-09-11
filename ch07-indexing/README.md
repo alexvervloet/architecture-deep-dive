@@ -13,7 +13,7 @@ python ch07-indexing/stress.py     # offline, no key, ~4 seconds
 
 Output is byte-identical across runs. Embedding cost and latency are modelled
 at $0.000005 per 1k characters and 3ms per document; the ratios between designs
-do not depend on those constants.
+don't depend on those constants.
 
 ## The result
 
@@ -30,11 +30,11 @@ change rather than how often anyone asks a question. Those two rates differ by
 orders of magnitude in any real system.
 
 **Per-request indexing adds 36ms and $0.000012 to every request, forever, to
-catch three edits.** Grow the corpus and that scales; the edit rate does not.
+catch three edits.** Grow the corpus and that scales; the edit rate doesn't.
 
 **Build-at-boot was the worst here**, 13 of 60 answers confidently obsolete and
 never catching up. Its staleness clock is your deploy cadence, so it gets worse
-as a service stabilises. It is also what most code does by accident.
+as a service stabilises. It's also what most code does by accident.
 
 **The sweep, and which column to read:**
 
@@ -49,9 +49,9 @@ Read **worst lag**, not correctness. Correctness depends on how often the
 workload asks about an edited document, so it moves when the question mix
 moves. The lag is a property of the schedule alone.
 
-The real cost of write-through is not in the table: every path that can modify
+The real cost of write-through isn't in the table: every path that can modify
 a document has to remember to call it, and the one that forgets leaves an entry
-stale forever with no timer coming to fix it. That is why the decision is
+stale forever with no timer coming to fix it. That's why the decision is
 write-through **plus** a slow scheduled rebuild as a safety net.
 
 ## An earlier version of this chapter measured nothing
