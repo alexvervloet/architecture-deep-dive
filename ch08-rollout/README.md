@@ -20,7 +20,7 @@ Both are honestly described as "spend fewer tokens on the context":
 - **v2-trim**: shorter system preamble, full documents. **14/14** correct.
 - **v2-truncate**: each document clipped to 120 characters. **11/14** correct.
 
-Nothing in the diff distinguishes them. That is why rollout machinery exists.
+Nothing in the diff distinguishes them. That's why rollout machinery exists.
 
 Production feedback is a **thumbs-down** (60% on a wrong answer, 3% on a right
 one), not a gold label. Offline you know which responses are wrong; online you
@@ -50,15 +50,15 @@ answers and 290 requests. Both numbers are set by the noise in the signal, not
 by the size of the regression. Detection fired the moment the canary reached
 its 30th sample.
 
-**Shadow exposed nobody and could not reach a verdict.** It reported **64%
+**Shadow exposed nobody and couldn't reach a verdict.** It reported **64%
 disagreement against a true 21% breakage rate**, because most of the gap is
 answers that changed and stayed correct. It costs a second model call on every
 request and produces a queue for a human, which is a real cost in no column
 here.
 
-**Stacking is not redundancy.** Gate A plus canary scored exactly what the
+**Stacking isn't redundancy.** Gate A plus canary scored exactly what the
 canary scored alone, because the gate contributed nothing when its suite
-missed. That is the argument for having both.
+missed. That's the argument for having both.
 
 Full reasoning, and why the 129-versus-0 split is an illustration rather than a
 discovered fact: [ADR.md](ADR.md).
