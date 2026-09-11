@@ -4,23 +4,23 @@ Every other repo in this series teaches a component: the API call, the retriever
 loop, the guardrail, the eval. This one teaches the seams between them, which nobody hands
 you and every design review asks about.
 
-The question here is not "how do I build a retriever." You already built one. It is where
+The question here isn't "how do I build a retriever." You already built one. It's where
 retrieval lives, what happens to the request when it fails, who owns the conversation state
 once there are two workers, and what it costs you to find out later that you put the
 boundary in the wrong place.
 
 ## Why this dive exists
 
-An LLM app breaks in ways a CRUD app does not, and the breakages are structural rather than
+An LLM app breaks in ways a CRUD app doesn't, and the breakages are structural rather than
 local.
 
 - Requests take seconds to minutes, so the request-and-response shape that works everywhere
   else falls over at single-digit concurrency.
 - The expensive dependency is non-deterministic and occasionally down, so "retry and hope"
   is a design decision with a correctness cost rather than a config value.
-- You cannot unsend a token, so streaming moves your safety checks somewhere they have less
+- You can't unsend a token, so streaming moves your safety checks somewhere they have less
   to work with.
-- The thing you are scaling is weights on a GPU rather than stateless workers, so the usual
+- The thing you're scaling is weights on a GPU rather than stateless workers, so the usual
   advice about splitting services inverts.
 
 Those are architecture problems. They have answers, the answers conflict, and which one is
@@ -77,22 +77,22 @@ python ch10-assembly/stress.py         # chapter 10: all nine decisions, three p
 
 Two results from the harness worth seeing before any chapter exists.
 
-**A dead dependency and a slow one are not the same outage.** Same workload, same 0%
+**A dead dependency and a slow one aren't the same outage.** Same workload, same 0%
 correct answers, and the wall clock differs by two orders of magnitude. The dead provider
 fails 40 requests in 140ms. The slow one holds every worker until each request burns its
 full 3s deadline, taking 15,180ms. Anything that treats those alike is wrong about one of
 them.
 
 **The day-one app answers questions it has no source for.** Ask it about quantum
-entanglement and it replies fluently from a document about two-factor auth. It did not
-error, so an availability dashboard scores that request as a success. That is why the
+entanglement and it replies fluently from a document about two-factor auth. It didn't
+error, so an availability dashboard scores that request as a success. That's why the
 stress harness separates `wrong_source` from `error`, and why "answered at all" is never
 the headline number in these ADRs.
 
 Determinism here is a specific claim rather than a vibe. The same workload run twice,
 concurrently, produces identical answers, sources, failures, and simulated latency.
 `02_repeatability.py` asserts exactly that, including a check that running at concurrency 1
-changes nothing. Wall-clock latency does not reproduce and never gets asserted on.
+changes nothing. Wall-clock latency doesn't reproduce and never gets asserted on.
 Per-request drift runs a few milliseconds, and the script prints it rather than hiding it.
 Claims that need to reproduce cite simulated time. Claims about what a real machine did say
 so, and show the spread.
@@ -115,7 +115,7 @@ so, and show the spread.
 No chapter is done until its ADR cites a run that actually happened, per the series'
 [authoring principles](https://github.com/alexvervloet/ai-engineering-deep-dive/blob/main/AUTHORING-LESSONS.md).
 CI runs every one of these experiments on push, so a chapter whose measurement stops
-running fails the build. Be clear about what that does and does not buy: four of them
+running fails the build. Be clear about what that does and doesn't buy: four of them
 assert (determinism, the ch01 fairness gate, ch07's edit-visibility check, ch04's ratio
 ceiling) and the rest only have to finish. A number can drift inside a passing run, and
 one did: see the ch04 entry in [LESSONS.md](LESSONS.md).
@@ -129,12 +129,12 @@ code was.
 
 After [Production](https://github.com/alexvervloet/ai-in-production-deep-dive), #8.
 Production teaches the dozen lines around the model call that make one app safe, cheap, and
-observable. This dive asks where those lines live once there is more than one of everything.
+observable. This dive asks where those lines live once there's more than one of everything.
 It pairs with [Observability](https://github.com/alexvervloet/observability-deep-dive),
 because the numbers the ADRs cite come from somewhere, and with
 [Professional Tools](https://github.com/alexvervloet/professional-tools-deep-dive), because
 several of these decisions are exactly what a framework decides for you.
 
-You want the components first. Reading this before you have hand-rolled a retriever and an
+You want the components first. Reading this before you've hand-rolled a retriever and an
 agent loop gives you opinions without the experience to check them, which is the failure
 mode this whole series is built against.
