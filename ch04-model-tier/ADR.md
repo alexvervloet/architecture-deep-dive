@@ -9,10 +9,10 @@ seconds, real subprocesses over real sockets, no key required.
 
 The model can be a function call inside the app process, or a service the app
 talks to over a socket. Every other split-the-service argument applies here,
-plus one that does not exist in a CRUD system: the thing being separated is
-**weights and a GPU**, and it fails in ways ordinary code does not. An
+plus one that doesn't exist in a CRUD system: the thing being separated is
+**weights and a GPU**, and it fails in ways ordinary code doesn't. An
 out-of-memory kill, a CUDA fault, or a segfault in a native inference library
-does not raise a Python exception you can catch. It ends the process.
+doesn't raise a Python exception you can catch. It ends the process.
 
 This chapter was written expecting to lose. The build plan's open question was
 whether it should exist at all, or fold into chapter 6 as a blast-radius
@@ -33,7 +33,7 @@ more failure mode, one more deployment.
 ## Decision
 
 Take B. The measured cost is small enough to be irrelevant against a real
-model call, and the failure containment is not obtainable any other way.
+model call, and the failure containment isn't obtainable any other way.
 
 ## Consequences, measured
 
@@ -41,15 +41,15 @@ model call, and the failure containment is not obtainable any other way.
 socket, real JSON encode and decode, real HTTP parse, and real cross-process
 scheduling. Two five-trial runs on the same machine give medians of 0.99ms and
 0.95ms, spreading 0.88 to 1.16 on an idle box and 0.56 to 1.34 with the rest of
-the suite running. Quote it as "about a millisecond". The spread is not noise
-to be averaged away, it is the resolution this measurement has, and the run
+the suite running. Quote it as "about a millisecond". The spread isn't noise
+to be averaged away, it's the resolution this measurement has, and the run
 prints its own trials so you can see yours.
 
-**Against a realistic model call, that is 0.09%.** With the 'slow' profile
-(~1.3s), the tiered request medians 1154ms. The boundary did not get more
+**Against a realistic model call, that's 0.09%.** With the 'slow' profile
+(~1.3s), the tiered request medians 1154ms. The boundary didn't get more
 expensive; the request got bigger. This is the number that resolves the
-chapter's open question: the split is not "measurably worse on every number",
-it is worse by a tenth of a percent. The ratio is also the part that survives
+chapter's open question: the split isn't "measurably worse on every number",
+it's worse by a tenth of a percent. The ratio is also the part that survives
 a change of machine, which is why the stressor asserts on it and not on the
 milliseconds.
 
@@ -71,31 +71,31 @@ the app is still there: it serves what it can, and the requests that genuinely
 need the model fail in milliseconds with a stated reason instead of a
 connection timeout.
 
-That is the entire purchase. A millisecond per request buys the difference
+That's the entire purchase. A millisecond per request buys the difference
 between "the model is down" and "the product is down".
 
 **Batching break-even is arithmetic, not a measurement, and is labelled as
 such in the output.** A tier can batch concurrent calls; an in-process model
-in a worker cannot. With a fixed per-call overhead F amortised over a batch of
+in a worker can't. With a fixed per-call overhead F amortised over a batch of
 N, the tier wins when `F * (1 - 1/N)` exceeds the hop, so at about 1ms F must
 exceed roughly 2ms at N=2 and roughly 1ms at N=32. The run prints the table
-against whatever it just measured. The repo cannot measure F, because the mock has no
+against whatever it just measured. The repo can't measure F, because the mock has no
 real per-call overhead to amortise. Read the table as a design tool: measure
-your provider's fixed overhead, and if it is below those numbers, batching is
-not the reason to split.
+your provider's fixed overhead, and if it's below those numbers, batching isn't
+the reason to split.
 
 ## What would flip this decision
 
 - **A single-process deployment with nothing else to protect.** A CLI, a
-  notebook, a desktop app. There is no "rest of the app" to keep alive.
+  notebook, a desktop app. There's no "rest of the app" to keep alive.
 - **A hosted provider.** If the model is already an API call to somebody
   else's service, this decision was made for you and the tier is theirs. This
   chapter is about self-hosted weights.
 - **Sub-10ms end-to-end budgets.** Then the hop is 10% and the arithmetic
-  inverts. That is not an LLM app.
-- **A team that cannot operate two processes.** The tier is only free if
+  inverts. That isn't an LLM app.
+- **A team that can't operate two processes.** The tier is only free if
   deploying, monitoring, and versioning a second service is already routine.
-  That cost is real and this measurement does not include it.
+  That cost is real and this measurement doesn't include it.
 
 ## Limits of this measurement
 
@@ -103,28 +103,28 @@ not the reason to split.
   container adds little; same availability zone adds perhaps 0.2 to 1ms;
   cross-zone is milliseconds and would change the percentage but not the
   conclusion against a 1.3s call.
-- **Measuring the hop by differencing end-to-end latency does not work**, and
+- **Measuring the hop by differencing end-to-end latency doesn't work**, and
   the first version of this chapter did exactly that. Retrieval jitter in the
   reference app is several times larger than the boundary, so the estimate
   swung between 0.9ms and 2.7ms across runs. The number above comes from a
   timer inside the app around the model call alone. See LESSONS.md.
-- **The hop is wall clock, and instrumenting it did not make it a constant.**
-  Moving the timer inside the app cut the spread by roughly half; it did not
+- **The hop is wall clock, and instrumenting it didn't make it a constant.**
+  Moving the timer inside the app cut the spread by roughly half; it didn't
   remove it. Five trials still spread over several tenths of a millisecond, and
   how far depends on what else the machine is doing. The figure this ADR
   published on 2026-08-07 was 1.45ms, which no longer reproduces on the machine
-  that produced it. That is why the number here is a median with a
+  that produced it. That's why the number here is a median with a
   range, why the stressor asserts on the ratio instead, and why ch10 treats
   the hop as approximate when it composes a budget. Every other number in this
-  repo is derived from simulated time and reproduces exactly; this one cannot,
+  repo is derived from simulated time and reproduces exactly; this one can't,
   and saying so is cheaper than being quietly wrong later. See LESSONS.md.
-- **The crash is a process death, not an exception.** That is deliberate and
-  it is the fair comparison: an in-process model that raises a catchable
+- **The crash is a process death, not an exception.** That's deliberate and
+  it's the fair comparison: an in-process model that raises a catchable
   exception is recoverable and would show nothing here. The failures that
-  motivate a tier are the ones that are not exceptions.
-- **The fleet arguments are not measured**, because they cannot be on one
+  motivate a tier are the ones that aren't exceptions.
+- **The fleet arguments aren't measured**, because they can't be on one
   laptop: GPU utilisation across tenants, independent scaling of app and model
   capacity, one copy of the weights instead of one per worker, and rolling a
-  model version without redeploying the app. They are real and they are
-  probably larger than anything above. This ADR does not count them, and no
+  model version without redeploying the app. They're real and they're
+  probably larger than anything above. This ADR doesn't count them, and no
   claim here rests on them.
