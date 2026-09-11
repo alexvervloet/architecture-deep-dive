@@ -19,8 +19,8 @@ context", both the same size of diff:
 - **v2-truncate**: each document clipped to 120 characters. 11/14 correct, so
   3 of 14 questions now answer from the wrong part of the right document.
 
-Nothing in the diff distinguishes them. That is the premise: rollout machinery
-exists because you cannot tell by reading.
+Nothing in the diff distinguishes them. That's the premise: rollout machinery
+exists because you can't tell by reading.
 
 Production feedback is modelled as a **thumbs-down**, not a gold label: 60% on
 a wrong answer, 3% on a right one. Offline you know exactly which responses are
@@ -55,19 +55,19 @@ the size of the regression: detection fired the moment the canary accumulated
 its 30th sample. A quieter regression, or a smaller canary share, moves that
 number and not in a good direction.
 
-**Shadow exposes nobody and cannot reach a verdict.** Zero bad answers served,
+**Shadow exposes nobody and can't reach a verdict.** Zero bad answers served,
 flagged at request 39, and 600 extra model calls, one per request, doubling
 inference spend for the duration. What it produced was a **64% disagreement
 rate against a true 21% breakage rate**. Most of that gap is answers that
-changed and stayed correct. Shadow can tell you something moved; it cannot tell
+changed and stayed correct. Shadow can tell you something moved; it can't tell
 you whether that was bad, so its output is a queue for a human, which is a real
 cost that appears in no column here.
 
-**Stacking is not redundancy.** `gate (suite A) + canary` scored exactly what
+**Stacking isn't redundancy.** `gate (suite A) + canary` scored exactly what
 the canary scored alone, because the gate contributed nothing when its suite
-missed. That is the argument for having both rather than evidence against it:
+missed. That's the argument for having both rather than evidence against it:
 the gate is free and instant when it works, and the canary is the only thing
-covering what the suite does not.
+covering what the suite doesn't.
 
 ## Decision
 
@@ -82,18 +82,18 @@ reviewer.
   question your users actually ask, the gate stops being a sample and the
   canary becomes optional.
 - **Too little traffic to canary.** The canary needed 30 samples at 10%
-  exposure, which is 300 requests. A service doing 300 requests a week cannot
+  exposure, which is 300 requests. A service doing 300 requests a week can't
   detect anything this way, and the gate plus shadow is the whole toolkit.
-- **A wrong answer that cannot be tolerated even eight times.** Then shadow,
+- **A wrong answer that can't be tolerated even eight times.** Then shadow,
   and pay for the second inference and the reviewer.
 - **Changes that alter behaviour that no automatic signal can grade** (tone,
-  formatting, persona). None of these shapes help; that is a human review
+  formatting, persona). None of these shapes help; that's a human review
   problem wearing a deploy costume.
 
 ## Limits of this measurement
 
 - **Both eval suites were chosen by me.** Suite A missing all three affected
-  questions is not a discovered fact, it is a constructed illustration of a
+  questions isn't a discovered fact, it's a constructed illustration of a
   real phenomenon. The transferable claim is the mechanism (a sampled gate is
   blind outside its sample), not the 129-versus-0 split, which is as large or
   small as the sample I picked.
@@ -101,13 +101,13 @@ reviewer.
   scales directly with the gap between them, so the "request 290" figure is a
   property of those constants. Real feedback is far sparser, which makes real
   canaries slower than this one, not faster.
-- **The canary share and thresholds were not tuned** (10%, 30 samples, 6 point
+- **The canary share and thresholds weren't tuned** (10%, 30 samples, 6 point
   margin). A more sensitive canary detects sooner and rolls back on noise more
-  often; the chapter does not measure that failure mode.
+  often; the chapter doesn't measure that failure mode.
 - **Shadow's disagreement rate is compared against a known breakage rate**,
   which is only possible because this repo has gold labels. That comparison is
-  the point being made and is also the thing a real shadow deployment cannot
+  the point being made and is also the thing a real shadow deployment can't
   do for itself.
 - **One regression, one safe change.** A regression that broke rarer questions
-  would evade both the gate and the canary for longer, and this chapter does
-  not sweep that.
+  would evade both the gate and the canary for longer, and this chapter doesn't
+  sweep that.
