@@ -12,8 +12,8 @@ never see: negotiated rates, rate-limit overrides, migration plans. The shared
 help centre is visible to both.
 
 The question is where the permission check sits relative to retrieval and to
-the model call. Four answers, and the first is the one that ships, because it
-is the only one that asks nothing of the retrieval layer:
+the model call. Four answers, and the first is the one that ships, because it's
+the only one that asks nothing of the retrieval layer:
 
 | | behaviour |
 |---|---|
@@ -43,17 +43,17 @@ for when tenant count is small and isolation requirements are hard.
 | filter in retrieval | 0 | 15/16 | 14.0 | 1 |
 | index per tenant | 0 | 15/16 | 14.0 | 2 |
 
-**Filtering after the model leaks, and the leak is exactly what you would fear.**
+**Filtering after the model leaks, and the leak is exactly what you'd fear.**
 Globex asked how long a password reset link stays valid and was told: *"Acme has
 a negotiated exception: their password reset links expire after 24 hours rather
 than 30 minutes, because their helpdesk batches requests overnight."* The
-citation list shown to the user was clean. The answer was not. A permission
-check that runs after the model has already read the document is not a
+citation list shown to the user was clean. The answer wasn't. A permission
+check that runs after the model has already read the document isn't a
 permission check.
 
 **The three safe designs scored identically at these settings.** 15/16 each.
 This chapter predicted that filtering after retrieval would lose recall, and at
-two tenants with top-3 retrieval it did not: the forbidden documents took slots
+two tenants with top-3 retrieval it didn't: the forbidden documents took slots
 two and three and pushed nothing important out.
 
 **So the prediction was measured against what it actually depends on:**
@@ -80,23 +80,23 @@ conditional: it needs k to be small relative to how many forbidden documents
 can outrank the answer. Filtering inside retrieval has no such condition, which
 is the reason to prefer it even where the two currently tie.
 
-**The leak rate rises from 6% to about 12% and plateaus**, because it is
+**The leak rate rises from 6% to about 12% and plateaus**, because it's
 governed by how often a forbidden document wins first place, not by how many
 of them exist. In absolute terms every added tenant still means more leaked
 answers and more customers exposed to each one.
 
 **Filtering inside retrieval also scans less**: 14 documents per query against
-18, because it never considers what it cannot return. That advantage grows with
+18, because it never considers what it can't return. That advantage grows with
 tenant count.
 
 **Index-per-tenant is fastest per query and pays at build time.** Two indexes
 holding 28 documents for a corpus of 18 unique ones, because the 10 shared
 documents are copied into each. That duplication grows with tenants while the
-shared corpus does not.
+shared corpus doesn't.
 
 ## What would flip this decision
 
-- **A retrieval layer that cannot filter.** Some vector stores make predicate
+- **A retrieval layer that can't filter.** Some vector stores make predicate
   filtering slow or unavailable, which is exactly the pressure that produces
   the filter-afterwards design. Then index-per-tenant, not post-filtering.
 - **Hard isolation requirements.** If tenants must not share storage at all for
@@ -117,9 +117,9 @@ shared corpus does not.
 - **The synthetic tenants are templated**, four notes each with varied numbers.
   That makes the sweep's shape trustworthy and its absolute rates a property of
   how competitive I made those templates.
-- **The predicted recall loss did not appear at the settings the chapter was
+- **The predicted recall loss didn't appear at the settings the chapter was
   designed around**, and the sweep exists because of that. The k=1 result is a
-  found condition, not the original hypothesis, and it is reported that way.
+  found condition, not the original hypothesis, and it's reported that way.
 - **Index-per-tenant's build cost is counted in documents, not seconds.** The
   embedding-spend arithmetic for that lives in chapter 7.
 - **Two-level permissions only** (shared or one tenant). Real systems have
