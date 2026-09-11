@@ -17,28 +17,28 @@ is the useful outcome.
    `seam/v0_baseline/` side by side and account for where the lines went.
 2. **Break the fairness gate on purpose.** Delete the retry loop from one call
    site in `inline/v2_reliability/app.py` and re-run `fairness.py`. It should
-   still pass, because retry does not change the happy path. Now make the
+   still pass, because retry doesn't change the happy path. Now make the
    change that *does* break it (return a truncated answer) and watch the gate
    refuse the measurement. What class of cheating does the gate catch, and what
    class does it miss?
 3. **Add a sixth requirement that favours inline.** The chapter tried and
    failed with streaming. Find one that actually wins: a change that touches
-   exactly one call site and needs something the seam's interface cannot
-   express. Measure it. If you cannot find one, that is a result too.
+   exactly one call site and needs something the seam's interface can't
+   express. Measure it. If you can't find one, that's a result too.
 
 ## Chapter 2: conversation state
 
 1. **Predict the correctness at 4 workers.** The history column is 29%, close
    to the 1/W the model predicts. Correctness was 62%. Before reading the ADR,
    explain the gap. (The answer is in how often a memoryless follow-up is
-   right by luck, and it is the reason this bug survives review.)
+   right by luck, and it's the reason this bug survives review.)
 2. **Make sticky routing fail harder.** The restart experiment cost sticky
    routing 4 points of correctness. Restart *two* workers, or restart one
    twice. At what restart frequency does sticky routing stop being a fix and
    start being a slow leak?
 3. **Break the determinism.** Replace the `route()` implementation with
    `random.randint(0, workers - 1)` and run twice. The correctness numbers will
-   move between runs. That is what the whole `app/determinism.py` apparatus
+   move between runs. That's what the whole `app/determinism.py` apparatus
    exists to prevent, and feeling the difference is worth two minutes.
 
 ## Chapter 3: sync, queue, or shed
@@ -52,7 +52,7 @@ is the useful outcome.
    evaporates. This is the single most common way a latency number
    lies.
 3. **Find the shed threshold that beats both.** `SheddingServer` takes
-   `max_queue_depth`. Sweep it. There is a value that maximises answered
+   `max_queue_depth`. Sweep it. There's a value that maximises answered
    requests without the wasted spend; find it, and then work out what it
    depends on (hint: service time and deadline, not the number you picked).
 
@@ -66,7 +66,7 @@ is the useful outcome.
    the boundary narrow the spread without closing it?
 2. **Make the crash catchable.** Change `/crash` in `model_server.py` from
    `os._exit(1)` to `raise RuntimeError(...)`. Re-run. The blast-radius table
-   collapses, because a catchable exception is not the failure this chapter is
+   collapses, because a catchable exception isn't the failure this chapter is
    about. Which real failures are `os._exit` and which are the exception?
 3. **Price the hop against a fast model.** Set the profile to `instant` and
    compute the hop as a percentage of the request. Then `slow`. The same ~1ms
@@ -77,7 +77,7 @@ is the useful outcome.
 1. **Predict the leak for `accumulated`.** It catches 5 of 5 violations. Guess
    how many it *prevents*. The answer is zero, and the reason is one sentence
    long.
-2. **Add a violation the window cannot contain.** Every case here has a span
+2. **Add a violation the window can't contain.** Every case here has a span
    under 32 characters. Write one that is longer than the hold (a multi-line
    credential, say) and re-run the sweep. Find the new threshold. This is the
    exercise that makes "hold 8 tokens" stop being a magic number.
@@ -119,7 +119,7 @@ is the useful outcome.
 1. **Predict the gate's verdict before you see the suites.** Suite A and suite
    B are both six questions and both plausible. One blocks the regression, one
    ships it to everybody. Guess which, then check. The point is that you
-   cannot.
+   can't.
 2. **Write a third suite that catches it for the wrong reason.** Make a suite
    that blocks the *safe* candidate too. Now you have a gate with a false
    positive, and the "shipped" column starts to matter.
@@ -130,12 +130,12 @@ is the useful outcome.
 ## Chapter 9: tenancy
 
 1. **Predict the relationship between the leak count and the k=1 recall loss.**
-   They are identical at every point in the sweep (1, 3, 7, 15, 31). Work out
-   why before reading the ADR; it is one sentence and it is the best thing in
+   They're identical at every point in the sweep (1, 3, 7, 15, 31). Work out
+   why before reading the ADR; it's one sentence and it's the best thing in
    the chapter.
-2. **Defeat the leak detector.** It is a substring test. Make the mock
+2. **Defeat the leak detector.** It's a substring test. Make the mock
    paraphrase instead of extract, and watch the leak count drop to zero while
-   the leak continues. Then decide what you would actually deploy to detect
+   the leak continues. Then decide what you'd actually deploy to detect
    this.
 3. **Add a third permission level.** Give some documents a "partner" tenancy
    visible to two tenants but not all. Which of the four designs survives the
@@ -147,7 +147,7 @@ is the useful outcome.
 1. **Predict a fourth product.** Pick something real (an IDE autocomplete, a
    nightly compliance report, an email triage bot), write its profile, and
    derive all nine decisions by hand. Then add it to `PRODUCTS` and see whether
-   `decide()` agrees with you. Where it does not, one of you is wrong and it is
+   `decide()` agrees with you. Where it doesn't, one of you is wrong and it's
    worth finding out which.
 2. **Break the budget.** Change the provider profile to `fast` (a 120ms model)
    and re-run. The model stops being 98% of the request, and the fixed
@@ -156,7 +156,7 @@ is the useful outcome.
 3. **Try to predict the tail.** The chapter refuses, because every constant it
    has is a mean. Go and measure a p95 for one component in isolation, add it
    to `MEASURED` with its source, and see whether component p95s compose into a
-   system p95. (They do not, and finding out why is the exercise.)
+   system p95. (They don't, and finding out why is the exercise.)
 
 ## Across the whole dive
 
@@ -164,10 +164,10 @@ is the useful outcome.
    across runs; the others move only in wall-clock columns. Confirm it, and
    for any that move, decide whether the moving number is load-bearing for the
    chapter's claim.
-2. **Find a claim that is not backed by a number.** There are some: the
+2. **Find a claim that isn't backed by a number.** There are some: the
    fleet arguments in ch04, the review queue in ch08, the cache unsoundness in
    ch09. Each is named as unmeasured in its ADR. Pick one and design the
    experiment that would settle it.
 3. **Read the four LESSONS.md entries, then go looking for a fifth.** Two of
    them are metrics that reported success on broken systems. That failure mode
-   is not extinct in this repo; it is just not currently known.
+   isn't extinct in this repo; it's just not currently known.
