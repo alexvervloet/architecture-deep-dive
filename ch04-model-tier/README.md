@@ -47,11 +47,11 @@ difference between "the model is down" and "the product is down".
 
 This chapter was written expecting to lose. The build plan asked whether it
 should exist at all, on the theory that a service split is worse on every
-number measurable on one laptop. It is worse by a tenth of a percent, and the
-containment is not obtainable any other way, so the chapter stayed.
+number measurable on one laptop. It's worse by a tenth of a percent, and the
+containment isn't obtainable any other way, so the chapter stayed.
 
 The batching section is arithmetic on the measured hop, not a measurement, and
-says so in its own heading. The repo cannot measure a provider's fixed
+says so in its own heading. The repo can't measure a provider's fixed
 per-call overhead, so it gives you the break-even threshold to measure against
 instead.
 
