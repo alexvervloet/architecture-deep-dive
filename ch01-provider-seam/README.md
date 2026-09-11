@@ -17,7 +17,7 @@ Order matters. `fairness.py` loads all twelve builds and checks they produce
 byte-identical output for the same inputs. A line count is trivially winnable
 by doing less work, so until that passes, `measure.py` is measuring nothing.
 
-## What is here
+## What's here
 
 ```
 inline/     v0_baseline  v1_claude  v2_reliability  v3_cost  v4_feature  v5_streaming
@@ -43,12 +43,12 @@ nothing.
 ## The result
 
 The seam changed 95 lines across five requirements; inline changed 192. Its
-upfront cost was 1 line, so there is no break-even point to find.
+upfront cost was 1 line, so there's no break-even point to find.
 
 The requirement chosen to favour inline (streaming one call site) still went
 to the seam on lines, 32 against 40, which refuted this chapter's own
 prediction. The real cost of that requirement showed up somewhere line
-counting cannot see: the seam's interface doubled, its cost-accounting
+counting can't see: the seam's interface doubled, its cost-accounting
 guarantee weakened, and retry silently stopped applying to the streaming path
 in *both* builds.
 
