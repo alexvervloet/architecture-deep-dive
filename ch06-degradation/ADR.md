@@ -8,7 +8,7 @@
 
 A dependency fails. The app can return an error, or it can return something
 else. "Something else" is usually presented as strictly better, and this
-chapter exists because it is not: a fallback does not restore service, it
+chapter exists because it isn't: a fallback doesn't restore service, it
 changes the failure, and the new failure is harder to see.
 
 Three designs, one workload, six scenarios:
@@ -17,7 +17,7 @@ Three designs, one workload, six scenarios:
 |---|---|
 | hard fail | any dependency error fails the request |
 | tiered fallback | stale cache when retrieval is down, raw snippet when the model is down |
-| tiered + breaker | the same fallbacks, plus stop calling a dependency that is not answering |
+| tiered + breaker | the same fallbacks, plus stop calling a dependency that isn't answering |
 
 Answers are graded three ways, against **what the healthy pipeline itself
 answers**, so no design can score well by dumping a whole document:
@@ -30,7 +30,7 @@ answers**, so no design can score well by dumping a whole document:
 ## Decision
 
 Fall back deliberately, label the degraded tier in the response, and put a
-circuit breaker in front of the model. Do not treat availability as the
+circuit breaker in front of the model. Don't treat availability as the
 success metric.
 
 ## Consequences, measured
@@ -57,7 +57,7 @@ minutes. Nothing in the response says which one the user got.
 
 The snippet tier is the fallback that behaves best, because it serves real
 current text. 9 of 24 land in "supported": a relevant help-centre sentence
-that is not the answer. That is a defensible product decision, and it is
+that isn't the answer. That's a defensible product decision, and it's
 visible in a column rather than hidden inside an availability number.
 
 **Model failing 40% of calls (the common one):** hard fail answers 17/24, all
@@ -107,7 +107,7 @@ whether they admit it and in what the wrongness costs to produce.
   advantage is against slowness. Against a dead dependency, failing fast is
   already free.
 - **Short outages only.** If faults resolve in seconds, the breaker trips
-  around the time the problem ends and the added state is not worth it.
+  around the time the problem ends and the added state isn't worth it.
 
 ## Limits of this measurement
 
@@ -121,10 +121,10 @@ whether they admit it and in what the wrongness costs to produce.
   of its three documents are outdated, which is a choice, not a finding. The
   transferable point is that a cache's correctness decays and nothing in the
   serving path knows by how much.
-- **Breaker parameters were not tuned.** Threshold 3, probe every 12. A more
+- **Breaker parameters weren't tuned.** Threshold 3, probe every 12. A more
   aggressive breaker would trip sooner and might move p95; that would be a
-  different experiment and the ADR does not claim it would not.
+  different experiment and the ADR doesn't claim it wouldn't.
 - **The degraded tier is labelled internally but the grading ignores the
   label.** A real product would show the user "our search is down, this may be
   out of date", which changes the cost of an unsupported answer considerably.
-  That is a product decision this measurement cannot make.
+  That's a product decision this measurement can't make.
