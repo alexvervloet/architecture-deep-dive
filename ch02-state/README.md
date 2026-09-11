@@ -26,7 +26,7 @@ prove the opposite of the truth.
 ```
 
 Same follow-up sentence, two different correct answers. Only the conversation
-tells them apart, so an app that loses the history does not fail, it answers a
+tells them apart, so an app that loses the history doesn't fail, it answers a
 different question well.
 
 Correctness is scored on **provenance**: did the answer sentence actually come
@@ -61,7 +61,7 @@ a partial quality regression that looks like model noise.
 workers, then dropped to 96% when one worker was restarted between turns. Small
 enough to blame on something else, and it recurs on every deploy.
 
-The shared store cost 0.47ms per turn against the dict's 0.008ms. That is 50x,
-and it is under 0.1% of a realistic 900ms model call.
+The shared store cost 0.47ms per turn against the dict's 0.008ms. That's 50x,
+and it's under 0.1% of a realistic 900ms model call.
 
 Full reasoning and the conditions that flip the decision: [ADR.md](ADR.md).
