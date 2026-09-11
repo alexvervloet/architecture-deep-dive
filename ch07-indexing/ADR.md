@@ -18,7 +18,7 @@ often" has a price tag and "refresh every request" has an absurd one.
 Sixty requests over sixty ticks, with three documents edited mid-run at ticks
 11, 27 and 43: a password reset link goes from 30 minutes to 15, a refund
 window from 30 days to 60, rate limits double. An answer counts as correct only
-if it is supported by the document *as it exists now*.
+if it's supported by the document *as it exists now*.
 
 ## Options
 
@@ -52,11 +52,11 @@ numbers differ by orders of magnitude in every real system.
 **Per-request indexing is never stale and never affordable.** It adds 36ms and
 $0.000012 to every single request, forever, to catch three edits. Scale the
 corpus from 12 documents to 12,000 and both numbers scale with it while the
-edit rate does not.
+edit rate doesn't.
 
 **Build-at-boot is the one nobody chooses, and it was the worst here.** 13 of
 60 answers were confidently obsolete, and it never caught up, because nothing
-was ever going to rebuild it. Its staleness is not "a few minutes"; it is
+was ever going to rebuild it. Its staleness isn't "a few minutes"; it's
 "however long since the last deploy", which gets *worse* as a service
 stabilises.
 
@@ -74,10 +74,10 @@ stabilises.
 **Read the lag column, not the correctness column.** Correctness is roughly
 proportional to spend across this range with no convenient knee, and it depends
 on how often the workload asks about an edited document. Change the question
-mix and every correctness number moves. The lag does not: it is a property of
-the schedule alone, so it is the number that belongs in a design document.
+mix and every correctness number moves. The lag doesn't: it's a property of
+the schedule alone, so it's the number that belongs in a design document.
 
-**The real cost of write-through is not in the table.** Every code path that
+**The real cost of write-through isn't in the table.** Every code path that
 can modify a document has to remember to call it, and the one that forgets
 leaves an entry stale forever with no timer coming to repair it. That failure
 is silent and unbounded, where a schedule's is periodic and predictable. Hence
@@ -86,27 +86,27 @@ write has a ceiling on how long it can lie.
 
 ## What would flip this decision
 
-- **A corpus that changes more often than it is queried.** Then per-request
+- **A corpus that changes more often than it's queried.** Then per-request
   indexing stops being absurd, because you were going to re-embed anyway.
 - **No control of the write path.** If documents arrive by a nightly dump from
-  a system you do not own, write-through is not available and the schedule is
+  a system you don't own, write-through isn't available and the schedule is
   the design.
-- **Staleness that is genuinely free.** Archival or reference corpora that do
-  not change do not need any of this; build at boot and stop thinking about it.
+- **Staleness that is genuinely free.** Archival or reference corpora that don't
+  change don't need any of this; build at boot and stop thinking about it.
   The failure mode above is specific to content that changes and is asserted as
   current.
-- **Embeddings that are not billed per token.** A local embedding model changes
+- **Embeddings that aren't billed per token.** A local embedding model changes
   the cost column dramatically, though not the latency one.
 
 ## Limits of this measurement
 
-- **Twelve documents.** A full rebuild costs 36ms here; at 12,000 documents it
-  is minutes, and the case against per-request indexing gets stronger while the
+- **Twelve documents.** A full rebuild costs 36ms here; at 12,000 documents it's
+  minutes, and the case against per-request indexing gets stronger while the
   case for write-through gets much stronger. Nothing in the ordering depends on
   corpus size, but the magnitudes do.
 - **Six of fourteen workload questions target an edited document.** That ratio
-  is a guess, it is stated in the code, and every correctness percentage here
-  scales with it. The lag figures do not.
+  is a guess, it's stated in the code, and every correctness percentage here
+  scales with it. The lag figures don't.
 - **The edit ticks are deliberately coprime with the sweep intervals.** An
   earlier version used 10, 25 and 40, which are multiples of several intervals,
   so those schedules recorded a worst-case lag of zero purely because an edit
@@ -119,5 +119,5 @@ write has a ceiling on how long it can lie.
   least one answer. See LESSONS.md.
 - **Embedding cost and latency are modelled**, at $0.000005 per 1k characters
   and 3ms per document, in the neighbourhood of a small hosted embedding model.
-  The ratios between designs do not depend on those constants; the absolute
+  The ratios between designs don't depend on those constants; the absolute
   dollars do.
