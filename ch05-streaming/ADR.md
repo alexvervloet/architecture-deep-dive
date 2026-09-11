@@ -7,9 +7,9 @@ Timing is arithmetic at 25ms/token; detection and leaked bytes are real.
 
 ## Context
 
-You cannot unsend a token. An output guard is a function of the text it can
+You can't unsend a token. An output guard is a function of the text it can
 see, and streaming hands text to the user before the guard has seen the rest
-of it. That is the whole problem, and it is specific to this kind of system:
+of it. That's the whole problem, and it's specific to this kind of system:
 nothing about a JSON API forces you to publish the first half of a response
 before deciding whether the second half is allowed.
 
@@ -48,11 +48,11 @@ because the guard can only recognise a pattern once the pattern is complete,
 and completing it is what the last delivered token did. Detection rate 100%,
 prevention rate 0%.
 
-**Guarding the chunk you are handed detects nothing.** `isolated` caught 0/5.
-A four-character token cannot contain an email address, so the guard is
-looking for a pattern it structurally cannot see. This shape is not a straw
-man; it is what "validate the chunk in the chunk handler" produces, and inside
-a streaming callback it is the obvious thing to write.
+**Guarding the chunk you're handed detects nothing.** `isolated` caught 0/5.
+A four-character token can't contain an email address, so the guard is
+looking for a pattern it structurally can't see. This shape isn't a straw
+man; it's what "validate the chunk in the chunk handler" produces, and inside
+a streaming callback it's the obvious thing to write.
 
 **Where the violation sits changes the leak, not the verdict:**
 
@@ -64,7 +64,7 @@ a streaming callback it is the obvious thing to write.
 | key_late | 80% | 20 | 15/20 | 0/20 |
 | leak_late | 95% | 14 | 12/14 | 0/14 |
 
-Where accumulated stops just short, that is the regex matching a prefix
+Where accumulated stops just short, that's the regex matching a prefix
 (`gmail.co` before the final `m` arrives). Luck, not a design property.
 
 **The window sweep turns the argument into a dial:**
@@ -86,28 +86,28 @@ same containment**.
 **And buffering charges that latency to every response, including the clean
 ones.** On the three clean responses, buffer's median TTFT is 1175ms against
 the window's 225ms. Most traffic is clean, so buffering pays the full
-generation time on 100% of responses to contain the small fraction that are
-not.
+generation time on 100% of responses to contain the small fraction that
+aren't.
 
 ## What would flip this decision
 
 - **A guard that needs the whole response.** Anything judging overall tone,
   factual consistency against sources, or a policy that depends on the
-  conclusion cannot work on a prefix at any window size. Buffer those, or run
+  conclusion can't work on a prefix at any window size. Buffer those, or run
   them as a second pass and accept that the first pass was streamed.
 - **An LLM-as-judge guard.** The window assumes the guard is cheap enough to
   run per token. A judge model per token is absurd; the window then has to
   hold whole sentences and re-check on boundaries, and the latency arithmetic
   changes completely.
 - **No streaming requirement.** If nobody is watching the tokens appear,
-  buffer. It is simpler and strictly safer, and the latency nobody perceives
+  buffer. It's simpler and strictly safer, and the latency nobody perceives
   costs nothing.
 - **Regulatory "must never emit".** A window is a probability reduction, not a
   proof. If a single leaked character is a reportable event, buffer.
 
 ## Limits of this measurement
 
-- **The hold of 8 is not a universal constant.** It works here because the
+- **The hold of 8 isn't a universal constant.** It works here because the
   longest violating span in this case set is 32 characters, which is exactly 8
   tokens. A multi-line credential or a leaked paragraph needs a bigger window.
   The sweep is the method; 8 is this corpus's answer. Size the window from the
@@ -116,14 +116,14 @@ not.
 - **Timing is arithmetic, not wall clock.** 25ms per token, applied identically
   to all four designs, so every millisecond figure is exactly reproducible.
   Real streams are jittery and TTFT includes network and prefill, which shifts
-  every row by roughly the same amount and does not change the ordering.
+  every row by roughly the same amount and doesn't change the ordering.
 - **The guard is regex, and the chapter takes it as given.** Whether regex
   detectors are any good is the prompt-injection dive's argument. One gap
-  found while writing this (`sk-[A-Za-z0-9]{12,}` does not match
+  found while writing this (`sk-[A-Za-z0-9]{12,}` doesn't match
   `sk-live-9Kd83jXmQ0aZ`, because the run stops at the second hyphen) made a
   case invisible to every design at once, which would have read as an
   architecture result. Fixed before the numbers above were taken.
-- **Retraction is not modelled as a fifth design.** Sending a "disregard that"
+- **Retraction isn't modelled as a fifth design.** Sending a "disregard that"
   event after the fact is what a UI can do, not what an architecture can
   guarantee: the bytes were rendered, possibly screenshotted, and certainly
   logged. Counting a retraction as prevention would be counting a wish.
