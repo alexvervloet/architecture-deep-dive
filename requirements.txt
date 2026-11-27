@@ -3,4 +3,4 @@ python-dotenv>=1.0.0,<2
 # Only needed if you point PROVIDER at a real stack. The offline path (the
 # default, and what every ADR is measured on) imports neither.
 openai>=3.0,<4
-anthropic>=1.0,<2
+anthropic>=2.0,<3
